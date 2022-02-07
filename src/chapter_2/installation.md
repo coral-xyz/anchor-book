@@ -45,7 +45,7 @@ Anchor version manager is a tool for using multiple versions of the anchor-cli. 
 Install `avm` using Cargo. Note this will replace your `anchor` binary if you had one installed.
 
 ```
-cargo install --git https://github.com/project-serum/anchor --locked --force
+cargo install --git https://github.com/project-serum/anchor avm --locked --force
 ```
 
 Install the latest version of the CLI using `avm`. You can also use the command to upgrade to the latest release in the future.
