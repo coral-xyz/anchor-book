@@ -40,7 +40,7 @@ anchor --version
 
 ### Installing using Anchor version manager (avm)
 
-It is recommended you uninstall the NPM package if you have it installed.
+Anchor version manager is a tool for using multiple versions of the anchor-cli. It will require the same dependencies as building from source. It is recommended you uninstall the NPM package if you have it installed.
 
 Install `avm` using Cargo. Note this will replace your `anchor` binary if you had one installed.
 
@@ -48,7 +48,7 @@ Install `avm` using Cargo. Note this will replace your `anchor` binary if you ha
 cargo install --git https://github.com/project-serum/anchor --locked --force
 ```
 
-Install the latest version of the CLI using `avm`. You can also use the command to upgrade to the latest release.
+Install the latest version of the CLI using `avm`. You can also use the command to upgrade to the latest release in the future.
 
 ```
 avm use latest
@@ -59,4 +59,3 @@ Verify the installation.
 ```
 anchor --version
 ```
-
