@@ -147,7 +147,7 @@ pub struct CreateUserStats<'info> {
 ```
 
 In the account validation struct we use `seeds` together with `init` to create a PDA with the desired seeds.
-Additionally, we add an empty `bump` constraint to signal to anchor that it should find the bump itself.
+Additionally, we add an empty `bump` constraint to signal to anchor that it should find the canonical bump itself.
 Then, in the handler, we call `ctx.bumps.get("user_stats")` to get the bump anchor found and save it to the user stats
 account as an extra property.
 
@@ -233,7 +233,7 @@ This means a PDA derived from some program X, may only be used to sign CPIs that
 This is great news because for many programs it is necessary that the program itself takes the authority over some assets.
 For instance, lending protocol programs need to manage deposited collateral and automated market maker programs need to manage the tokens put into their liquidity pools.
 
-Before we conclude this chapter, let's revisit the puppet workspace and add a PDA signature.
+Let's revisit the puppet workspace and add a PDA signature.
 
 First, adjust the puppet-master code:
 ```rust,ignore
@@ -253,9 +253,8 @@ mod puppet_master {
             puppet: ctx.accounts.puppet.to_account_info(),
             authority: ctx.accounts.authority.to_account_info()
         };
-        let bumps = &[bump][..];
-        let signer = &[&[bumps][..]];
-        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
+        let bump = &[bump][..];
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, &[&[bump][..]]);
         puppet::cpi::set_data(cpi_ctx, data)
     }
 }
@@ -269,7 +268,51 @@ pub struct PullStrings<'info> {
 }
 ```
 
-The `authority` account is now an `UncheckedAccount` instead of a `Signer`. When the puppet-master is invoked, the `authority` pda is not a signer yet so we mustn't add a check for it. We just care about the puppet-master being able to sign so we don't add any additional seeds. Just a bump that is calculated off-chain and then passed to the function. This is the new `puppet.ts`:
+The `authority` account is now an `UncheckedAccount` instead of a `Signer`. When the puppet-master is invoked, the `authority` pda is not a signer yet so we mustn't add a check for it. We just care about the puppet-master being able to sign so we don't add any additional seeds. Just a bump that is calculated off-chain and then passed to the function.
+
+Setting up a CPI can distract from the business logic of the program so it's recommended to move the CPI setup into the `impl` block of the instruction. The puppet-master program then looks like this:
+```rust,ignore
+use anchor_lang::prelude::*;
+use puppet::cpi::accounts::SetData;
+use puppet::program::Puppet;
+use puppet::{self, Data};
+
+declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
+
+#[program]
+mod puppet_master {
+    use super::*;
+    pub fn pull_strings(ctx: Context<PullStrings>, bump: u8, data: u64) -> ProgramResult {
+        let bump = &[bump][..];
+        puppet::cpi::set_data(
+            ctx.accounts.set_data_ctx().with_signer(&[&[bump][..]]),
+            data,
+        )
+    }
+}
+
+#[derive(Accounts)]
+pub struct PullStrings<'info> {
+    #[account(mut)]
+    pub puppet: Account<'info, Data>,
+    pub puppet_program: Program<'info, Puppet>,
+    pub authority: UncheckedAccount<'info>,
+}
+
+impl<'info> PullStrings<'info> {
+    pub fn set_data_ctx(&self) -> CpiContext<'_, '_, '_, 'info, SetData<'info>> {
+        let cpi_program = self.puppet_program.to_account_info();
+        let cpi_accounts = SetData {
+            puppet: self.puppet.to_account_info(),
+            authority: self.authority.to_account_info(),
+        };
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+```
+
+
+Finally, this is the new `puppet.ts`:
 ```ts
 import * as anchor from '@project-serum/anchor';
 import { web3 } from '@project-serum/anchor/';
@@ -314,3 +357,11 @@ describe('puppet', () => {
 ```
 
 The `authority` is no longer a randomly generated keypair but a PDA derived from the puppet-master program. This means the puppet-master can sign with it which it does inside `pullStrings`. It's worth noting that our implementation also allows non-canonical bumps but again because we are only interesting in being able to sign we don't care which bump is used.
+
+## PDAs: Conclusion
+
+This section serves as a brief recap of all the different things you can do with PDAs.
+
+First, you can create hashmaps with them. We created a user stats PDA which was derived from the user address. This created a link between the user address and the user stats account, allowing the latter to be easily found from the former. A subtle result of this hashmap structure is enforced uniqueness. When `init` is used with `seeds` and `bump`, it will always search for the canonical bump. This means that it can only be called once (because the 2nd time it's called the PDA will already be initialized). To illustrate how powerful enforced uniqueness is, consider a decentralized exchange program. In this program, anyone can create a new market for two assets. However, the program creators want liquidity to be concentrated so there should only be one market for every combination of two assets. This could be done without PDAs but would require a global account that saves all the different markets. Then upon market creation, the program would check whether the asset combination exists in the global market list. With PDAs this can be done much more straightforward. Any market would simply be the PDA of the mint addresses of the two assets. The program would then check whether either of the two possible PDAs (because the market could've been created with the assets in reverse order) already exists.
+
+Secondly, PDAs can be used to allow programs to sign CPIs. This means that programs can be given control over assets which they then manage according to the rules defined in their code.
