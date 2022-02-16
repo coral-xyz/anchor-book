@@ -137,9 +137,10 @@ pub struct CreateUserStats<'info> {
     pub user: Signer<'info>,
     // space: 8 discriminator + 2 level + 4 name length + 200 name + 1 bump
     #[account(
-    init,
-    payer = user,
-    space = 8 + 2 + 4 + 200 + 1, seeds = [b"user-stats", user.key().as_ref()], bump)]
+        init,
+        payer = user,
+        space = 8 + 2 + 4 + 200 + 1, seeds = [b"user-stats", user.key().as_ref()], bump
+    )]
     pub user_stats: Account<'info, UserStats>,
     pub system_program: Program<'info, System>,
 }
