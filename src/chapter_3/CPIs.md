@@ -265,6 +265,14 @@ describe('puppet', () => {
 
 The test passes because the signature that was given to the puppet-master by the authority was then extended to the puppet program which used it to check that the authority for the puppet account had signed the transaction.
 
+> Privilege extension is convenient but also dangerous. If a CPI is unintentionally made to a malicious program,
+> this program has the same privileges as the caller.
+> Anchor protects you from CPIs to malicious programs with two measures.
+> First, the `Program<'info, T>` type checks that the given account is the expected program `T`.
+> Should you ever forget to use the `Program` type, the automatically generated cpi function
+> (in the previous example this was `puppet::cpi::set_data`)
+> also checks that the `cpi_program` argument equals the expected program.
+
 ## Reloading an Account
 
 In the puppet program, the `Account<'info, T>` type is used for the `puppet` account. If a CPI edits an account of that type,
