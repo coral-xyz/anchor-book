@@ -97,6 +97,9 @@ There's one more thing to do to complete `SetupGame`. Every account is created w
 pub struct Game {...
 ```
  and `GameState`.
+ 
+ TODO: ADD Context here in relation to where the below code is added in relation to GameState / Game:
+ 
 ```rust,ignore
 impl Default for GameState {
     fn default() -> Self {
