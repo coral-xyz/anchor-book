@@ -14,7 +14,15 @@
     - [The Program Module](./chapter_3/the_program_module.md)
     - [Errors](./chapter_3/errors.md)
     - [Milestone Project - Tic-Tac-Toe](./chapter_3/milestone_project_tic-tac-toe.md)
-  - [Intermediate]()
+  - [Intermediate](./chapter_3/intermediate.md)
+    - [Cross-Program Invocations](./chapter_3/CPIs.md)
+    - [PDAs](./chapter_3/PDAs.md)
+    - [Events]()
+    - [Constants]()
+    - [Zero-Copy]()
+    - [Access Control]()
+    - [Building & Testing]()
+    - [Milestone Project - The Nightclub]()
 - [Anchor Periphery](./chapter_4/anchor_periphery.md)
   - [CLI](./chapter_4/cli.md)
   - [AVM](./chapter_4/avm.md)
@@ -24,3 +32,5 @@
 ---
 
 - [Reference Links](./reference_links.md)
+  - [Dispatch]()
+  - [The Discriminator]()
