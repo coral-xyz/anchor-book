@@ -130,8 +130,6 @@ You can find information about all constraints in the reference. We will cover s
 
 ## Safety checks
 
-Many of the [common security pitfalls](https://blog.neodyme.io/posts/solana_common_pitfalls) in Solana programs stem from the provision of arbitrary accounts to program functions. Checking the owner of an account, signer(s) of an instruction, or the account data type are examples. Anchor encourages checks through the use of the appropriate account types.
-
 Two of the Anchor account types, [AccountInfo](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account_info/index.html) and [UncheckedAccount](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/unchecked_account/index.html) do not implement any checks on the account being passed. Anchor implements safety checks that encourage additional documentation describing why additional checks are not necesssary.
 
 Attempting to build a program containing the following excerpt with `anchor build`:
