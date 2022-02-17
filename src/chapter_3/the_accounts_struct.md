@@ -125,3 +125,41 @@ pub struct SetData<'info> {
 ```
 
 You can find information about all constraints in the reference. We will cover some of the most important ones in the milestone project at the end of the Essentials section.
+
+## Safety checks
+
+Many of the [common security pitfalls](https://blog.neodyme.io/posts/solana_common_pitfalls) in Solana programs stem from the provision of arbitrary accounts to program functions. Checking the owner of an account, signer(s) of an instruction, or the account data type are examples. Anchor encourages checks through the use of the appropriate account types.
+
+Two of the Anchor account types, [AccountInfo](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account_info/index.html) and [UncheckedAccount](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/unchecked_account/index.html) do not implement any checks on the account being passed. Anchor implements safety checks that encourage additional documentation describing why additional checks are not necesssary. The exception to this is if the account is being initialized or if it is a program derived address. These are determined by the presence of `init` or `seeds` constraints in the account attribute for the account.
+
+Attempting to build a program containing the following excerpt with `anchor build`:
+
+```rust,ignore
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    pub potentially_dangerous: UncheckedAccount<'info>
+}
+```
+
+will result in an error similar to the following:
+
+```
+Error:
+        /anchor/tests/unchecked/programs/unchecked/src/lib.rs:15:8
+        Struct field "potentially_dangerous" is unsafe, but is not documented.
+        Please add a `/// SAFETY:` doc comment explaining why no checks through types are necessary.
+        See https://book.anchor-lang.com/chapter_3/the_accounts_struct.html#safety-checks for more information.
+```
+
+To fix this, write a doc comment describing the potential security implications, e.g.:
+
+```rust,ignore
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    /// SAFETY: This is not dangerous because we don't read or write from this account
+    pub potentially_dangerous: UncheckedAccount<'info>
+}
+```
+
+Note the doc comment needs to be a [line or block doc comment](https://doc.rust-lang.org/reference/comments.html#doc-comments) (/// or /\*\*) to be interepreted as doc attribute by Rust. Double slash comments (//) are not interpreted as such.
+
