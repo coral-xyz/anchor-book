@@ -1,11 +1,12 @@
 # The Accounts Struct
-The Accounts struct is where you define which accounts your instruction expects and which constraints these accounts should adhere to. You do this via two constructs: Types and constraints. 
+
+The Accounts struct is where you define which accounts your instruction expects and which constraints these accounts should adhere to. You do this via two constructs: Types and constraints.
 
 ## Types
 
 > [Account Types Reference](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/index.html)
 
-Each type has a specific use case in mind. Detailed explanations for the types can be found in the [reference](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/index.html).  We will briefly explain the most important type here, the `Account` type.
+Each type has a specific use case in mind. Detailed explanations for the types can be found in the [reference](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/index.html). We will briefly explain the most important type here, the `Account` type.
 
 ### The Account Type
 
@@ -46,8 +47,7 @@ Most importantly, the `#[account]` attribute sets the owner of that data to the 
 
 #### Using `Account<'a, T>` with non-anchor program accounts
 
-
-There may be cases where you want your program to interact with a non-Anchor program. You can still get all the benefits of `Account` but you have to write a custom wrapper type instead of using `#[account]`. For instance, Anchor provides wrapper types for the token program accounts so they can be used with `Account`. 
+There may be cases where you want your program to interact with a non-Anchor program. You can still get all the benefits of `Account` but you have to write a custom wrapper type instead of using `#[account]`. For instance, Anchor provides wrapper types for the token program accounts so they can be used with `Account`.
 
 ```rust,ignore
 use anchor_lang::prelude::*;
@@ -97,12 +97,14 @@ Check out the [reference for the Account type](https://docs.rs/anchor-lang/lates
 Account types can do a lot of work for you but they're not dynamic enough to handle all the security checks a secure program requires.
 
 Add constraints to an account with the following format:
+
 ```rust,ignore
 #[account(<constraints>)]
 pub account: AccountType
 ```
 
 Some constraints support custom Errors (we will explore errors [later](./errors.md)):
+
 ```rust,ignore
 #[account(...,<constraint> @ MyError::MyErrorVariant, ...)]
 pub account: AccountType
@@ -130,7 +132,7 @@ You can find information about all constraints in the reference. We will cover s
 
 Many of the [common security pitfalls](https://blog.neodyme.io/posts/solana_common_pitfalls) in Solana programs stem from the provision of arbitrary accounts to program functions. Checking the owner of an account, signer(s) of an instruction, or the account data type are examples. Anchor encourages checks through the use of the appropriate account types.
 
-Two of the Anchor account types, [AccountInfo](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account_info/index.html) and [UncheckedAccount](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/unchecked_account/index.html) do not implement any checks on the account being passed. Anchor implements safety checks that encourage additional documentation describing why additional checks are not necesssary. The exception to this is if the account is being initialized or if it is a program derived address. These are determined by the presence of `init` or `seeds` constraints in the account attribute for the account.
+Two of the Anchor account types, [AccountInfo](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account_info/index.html) and [UncheckedAccount](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/unchecked_account/index.html) do not implement any checks on the account being passed. Anchor implements safety checks that encourage additional documentation describing why additional checks are not necesssary.
 
 Attempting to build a program containing the following excerpt with `anchor build`:
 
@@ -162,4 +164,3 @@ pub struct Initialize<'info> {
 ```
 
 Note the doc comment needs to be a [line or block doc comment](https://doc.rust-lang.org/reference/comments.html#doc-comments) (/// or /\*\*) to be interepreted as doc attribute by Rust. Double slash comments (//) are not interpreted as such.
-
