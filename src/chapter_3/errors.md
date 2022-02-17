@@ -64,7 +64,7 @@ pub enum MyError {
 
 Many of the [common security pitfalls](https://blog.neodyme.io/posts/solana_common_pitfalls) in Solana programs stem from the provision of arbitrary accounts to program functions. Checking the owner of an account, signer(s) of an instruction, or the account data type are examples. Anchor encourages the use of [account types](http://localhost:3000/chapter_3/the_accounts_struct.html#the-account-type) that implement these checks automatically.
 
-Two of the Anchor account types, [AccountInfo](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account_info/index.html) and [UncheckedAccount](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/unchecked_account/index.html) do not implement any checks on the account being passed. Anchor implements safety checks that encourage additional documentation of potential security risks if you use either of these types.
+Two of the Anchor account types, [AccountInfo](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account_info/index.html) and [UncheckedAccount](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/unchecked_account/index.html) do not implement any checks on the account being passed. Anchor implements safety checks that encourage additional documentation of potential security risks if you use either of these types. The exception to this is if the account is being initialized or if it is a program derived address. These are determined by the presence of `init` or `seeds` constraints in the account attribute for the account.
 
 Attempting to build a program containing the following excerpt with `anchor build`:
 
@@ -81,7 +81,7 @@ will result in an error similar to the following:
 Error:
         /anchor/tests/unchecked/programs/unchecked/src/lib.rs:15:8
         Struct field "potentially_dangerous" is unsafe, but is not documented.
-        Please add a `/// SAFETY:` doc comment to the field enumerating potential security risks.
+        Please add a `/// SAFETY:` doc comment explaining why no checks through types are necessary.
         See https://book.anchor-lang.com/chapter_3/errors.html#safety-checks for more information.
 ```
 
