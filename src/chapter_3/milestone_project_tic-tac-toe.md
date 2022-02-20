@@ -105,6 +105,39 @@ impl Default for GameState {
 }
 ```
 
+> #### Warning
+>
+> Be careful when relying on Anchor to infer `space` using `T::default()`.
+> This may not always do the right thing in tandem with `BorshSerialize`.
+> 
+> Consider the example of `Option<T>`. Take a look at `borsh`'s spec:
+> ```asm
+> if x.is_some() {
+>   repr(1 as u8)
+>   repr(x.unwrap() as ident)
+> } else {
+>   repr(0 as u8)
+> }
+> ```
+> Do you spot any problems with the above?
+> If you answered, "well it's variable-length, and I'm not sure if that'll works", you'd be right!
+> 
+> Now let's take a look at the implementation of `Default` for `Option`:
+> ```rust
+> fn default() -> Option<T> {
+>     None
+> }
+> ```
+> 
+> So, `Option<T>::default()` i.e. `None` will always serialize to a single byte `0u8`
+> This holds for all types `T` (universal quantifier).
+> But your type `T` might take a lot more space than that!
+> In fact, it will take `1 + <length of borsh repr of T>` bytes.
+> 
+> Therefore, you should explicitly specify `space` vs. relying on Anchor to infer using `Default`
+> when working with such types (not just `Option`!).
+```
+
 And with this, `SetupGame` is complete and we can move on to the `setup_game` function. (If you like playing detective, you can pause here and try to figure out why what we just did will not work. Hint: Have a look at the [specification](https://borsh.io/) of the serialization library Anchor uses. If you cannot figure it out, don't worry. We are going to fix it very soon, together.)
 
 Let's start by adding an argument to the `setup_game` function.
