@@ -109,7 +109,7 @@ And with this, `SetupGame` is complete and we can move on to the `setup_game` fu
 
 Let's start by adding an argument to the `setup_game` function.
 ```rust,ignore
-pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> ProgramResult {
+pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> Result<()> {
     Ok(())
 }
 ```
@@ -117,7 +117,7 @@ Why didn't we just add `player_two` as an account in the accounts struct? There 
 
 Finish the instruction function by setting the game to its initial values:
 ```rust,ignore
-pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> ProgramResult {
+pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> Result<()> {
     let game = &mut ctx.accounts.game;
     game.players = [ctx.accounts.player_one.key(), player_two];
     game.turn = 1;
@@ -202,9 +202,9 @@ impl Game {
         self.players[self.current_player_index()]
     }
 
-    pub fn play(&mut self, tile: &Tile) -> ProgramResult {
+    pub fn play(&mut self, tile: &Tile) -> Result<()> {
         if !self.is_active() {
-            return Err(TicTacToeError::GameAlreadyOver.into());
+            return err!(TicTacToeError::GameAlreadyOver);
         }
         match tile {
             tile
@@ -212,13 +212,13 @@ impl Game {
                 row: 0..=2,
                 column: 0..=2,
             } => match self.board[tile.row as usize][tile.column as usize] {
-                Some(_) => return Err(TicTacToeError::TileAlreadySet.into()),
+                Some(_) => return err!(TicTacToeError::TileAlreadySet),
                 None => {
                     self.board[tile.row as usize][tile.column as usize] =
                         Some(Sign::from_usize(self.current_player_index()).unwrap());
                 }
             },
-            _ => return Err(TicTacToeError::TileOutOfBounds.into()),
+            _ => return err!(TicTacToeError::TileOutOfBounds),
         }
 
         self.update_state();
@@ -302,7 +302,7 @@ pub struct Tile {
 
 and the `TicTacToeError` type.
 ```rust,ignore
-#[error]
+#[error_code]
 pub enum TicTacToeError {
     TileOutOfBounds,
     TileAlreadySet,
@@ -313,7 +313,7 @@ pub enum TicTacToeError {
 
 Finally, we can add the `play` function inside the program module.
 ```rust,ignore
-pub fn play(ctx: Context<Play>, tile: Tile) -> ProgramResult {
+pub fn play(ctx: Context<Play>, tile: Tile) -> Result<()> {
     let game = &mut ctx.accounts.game;
 
     require!(
