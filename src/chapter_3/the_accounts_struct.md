@@ -22,7 +22,7 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 #[program]
 mod hello_anchor {
     use super::*;
-    pub fn set_data(ctx: Context<SetData>, data: u64) -> ProgramResult {
+    pub fn set_data(ctx: Context<SetData>, data: u64) -> Result<()> {
         ctx.accounts.my_account.data = data;
         Ok(())
     }
@@ -57,7 +57,7 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 #[program]
 mod hello_anchor {
     use super::*;
-    pub fn set_data(ctx: Context<SetData>, data: u64) -> ProgramResult {
+    pub fn set_data(ctx: Context<SetData>, data: u64) -> Result<()> {
         if ctx.accounts.token_account.amount > 0 {
             ctx.accounts.my_account.data = data;
         }

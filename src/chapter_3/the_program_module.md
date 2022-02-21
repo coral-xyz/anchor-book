@@ -5,7 +5,7 @@ The program module is where you define your business logic. You do so by writing
 #[program]
 mod hello_anchor {
     use super::*;
-    pub fn set_data(ctx: Context<SetData>, data: u64) -> ProgramResult {
+    pub fn set_data(ctx: Context<SetData>, data: u64) -> Result<()> {
         if ctx.accounts.token_account.amount > 0 {
             ctx.accounts.my_account.data = data;
         }
@@ -30,7 +30,7 @@ If your function requires instruction data, you can add it by adding arguments t
 #[program]
 mod hello_anchor {
     use super::*;
-    pub fn set_data(ctx: Context<SetData>, data: Data) -> ProgramResult {
+    pub fn set_data(ctx: Context<SetData>, data: Data) -> Result<()> {
         ctx.accounts.my_account.data = data.data;
         ctx.accounts.my_account.age = data.age;
         Ok(())
@@ -61,7 +61,7 @@ Conveniently, `#[account]` implements `Anchor(De)Serialize` for `MyAccount`, so 
 #[program]
 mod hello_anchor {
     use super::*;
-    pub fn set_data(ctx: Context<SetData>, data: MyAccount) -> ProgramResult {
+    pub fn set_data(ctx: Context<SetData>, data: MyAccount) -> Result<()> {
         ctx.accounts.my_account.set_inner(data);
         Ok(())
     }
