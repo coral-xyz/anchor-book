@@ -143,7 +143,7 @@ and running `anchor test`.
 
 ## Privilege Extension
 
-CPIs extend the privileges of the caller to the callee. The puppet account was passed as a mutable account to the puppet-master but it was still mutable in the puppet as well (otherwise the `expect` in the test would've failed). The same applies to signatures.
+CPIs extend the privileges of the caller to the callee. The puppet account was passed as a mutable account to the puppet-master but it was still mutable in the puppet program as well (otherwise the `expect` in the test would've failed). The same applies to signatures.
 
 If you want to prove this for yourself, add an `authority` field to the `Data` struct in the puppet program.
 ```rust,ignore
@@ -162,7 +162,7 @@ pub fn initialize(ctx: Context<Initialize>, authority: Pubkey) -> Result<()> {
 }
 ```
 
-Add `32` to the `space` constraint of the `puppet` field.
+Add `32` to the `space` constraint of the `puppet` field for the `Pubkey` field in the `Data` struct.
 ```rust,ignore
 #[derive(Accounts)]
 pub struct Initialize<'info> {
