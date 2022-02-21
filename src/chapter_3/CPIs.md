@@ -99,14 +99,14 @@ The `features = ["cpi"]` is used so we can not only use puppet's types but also 
 
 In the case of the puppet program, the puppet-master uses the `SetData` instruction builder struct provided by the `puppet::cpi::accounts` module to submit the accounts the `SetData` instruction of the puppet program expects. Then, the puppet-master creates a new cpi context and passes it to the `puppet::cpi::set_data` cpi function. This function has the exact same function as the `set_data` function in the puppet program with the exception that it expects a `CpiContext` instead of a `Context`.
 
-We can verify that everything worked as expects by replacing the contents of the `puppet.ts` file with:
+We can verify that everything works as expected by replacing the contents of the `puppet.ts` file with:
 ```ts
 import * as anchor from '@project-serum/anchor';
-import { web3 } from '@project-serum/anchor/';
 import { Program } from '@project-serum/anchor';
+import { Keypair, SystemProgram } from '@solana/web3.js';
+import { expect } from 'chai';
 import { Puppet } from '../target/types/puppet';
 import { PuppetMaster } from '../target/types/puppet_master';
-import { expect } from 'chai';
 
 describe('puppet', () => {
   anchor.setProvider(anchor.Provider.env());
@@ -114,14 +114,14 @@ describe('puppet', () => {
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
   const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
 
-  const puppetKeypair = web3.Keypair.generate();
+  const puppetKeypair = Keypair.generate();
 
   it('Does CPI!', async () => {
     await puppetProgram.rpc.initialize({
       accounts: {
         puppet: puppetKeypair.publicKey,
         user: anchor.getProvider().wallet.publicKey,
-        systemProgram: web3.SystemProgram.programId
+        systemProgram: SystemProgram.programId
       },
       signers: [puppetKeypair]
     });
@@ -138,6 +138,8 @@ describe('puppet', () => {
   });
 });
 ```
+
+and running `anchor test`.
 
 ## Privilege Extension
 
