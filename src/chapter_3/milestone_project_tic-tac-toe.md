@@ -170,6 +170,10 @@ Finally, we verify the game has been set up properly. Anchor's typescript client
 
 Now, run `anchor test`. This starts up (and subsequently shuts down) a local validator (make sure you don't have one running) and runs your tests using the test script defined in `Anchor.toml`.
 
+> When you adjust your test files it may happen that you'll see errors everywhere.
+> This is likely because the test file is looking for types from your program that haven't been generated yet.
+> To generate them, run `anchor build`. This builds the program and creates the idl and typescript types.
+
 ## Playing the game
 
 ### The Play Instruction
