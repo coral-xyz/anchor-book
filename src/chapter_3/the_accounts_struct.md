@@ -147,7 +147,7 @@ will result in an error similar to the following:
 Error:
         /anchor/tests/unchecked/programs/unchecked/src/lib.rs:15:8
         Struct field "potentially_dangerous" is unsafe, but is not documented.
-        Please add a `/// SAFETY:` doc comment explaining why no checks through types are necessary.
+        Please add a `/// CHECK:` doc comment explaining why no checks through types are necessary.
         See https://book.anchor-lang.com/chapter_3/the_accounts_struct.html#safety-checks for more information.
 ```
 
@@ -156,7 +156,7 @@ To fix this, write a doc comment describing the potential security implications,
 ```rust,ignore
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    /// SAFETY: This is not dangerous because we don't read or write from this account
+    /// CHECK: This is not dangerous because we don't read or write from this account
     pub potentially_dangerous: UncheckedAccount<'info>
 }
 ```
