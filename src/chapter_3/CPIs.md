@@ -21,11 +21,11 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 #[program]
 pub mod puppet {
     use super::*;
-    pub fn initialize(_ctx: Context<Initialize>) -> ProgramResult {
+    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
         Ok(())
     }
 
-    pub fn set_data(ctx: Context<SetData>, data: u64) -> ProgramResult {
+    pub fn set_data(ctx: Context<SetData>, data: u64) -> Result<()> {
         let puppet = &mut ctx.accounts.puppet;
         puppet.data = data;
         Ok(())
@@ -72,7 +72,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 #[program]
 mod puppet_master {
     use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> ProgramResult {
+    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> Result<()> {
         let cpi_program = ctx.accounts.puppet_program.to_account_info();
         let cpi_accounts = SetData {
             puppet: ctx.accounts.puppet.to_account_info(),
@@ -154,7 +154,7 @@ pub struct Data {
 
 and adjust the `initialize` function:
 ```rust,ignore
-pub fn initialize(ctx: Context<Initialize>, authority: Pubkey) -> ProgramResult {
+pub fn initialize(ctx: Context<Initialize>, authority: Pubkey) -> Result<()> {
     ctx.accounts.puppet.authority = authority;
     Ok(())
 }
@@ -196,7 +196,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 #[program]
 mod puppet_master {
     use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> ProgramResult {
+    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> Result<()> {
         let cpi_program = ctx.accounts.puppet_program.to_account_info();
         let cpi_accounts = SetData {
             puppet: ctx.accounts.puppet.to_account_info(),

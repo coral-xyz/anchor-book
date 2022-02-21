@@ -110,7 +110,7 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod game {
     use super::*;
     // handler function
-    pub fn create_user_stats(ctx: Context<CreateUserStats>, name: String) -> ProgramResult {
+    pub fn create_user_stats(ctx: Context<CreateUserStats>, name: String) -> Result<()> {
         let user_stats = &mut ctx.accounts.user_stats;
         user_stats.level = 0;
         if name.as_bytes().len() > 200 {
@@ -162,7 +162,7 @@ pub struct ChangeUserName<'info> {
 }
 
 // handler function
-pub fn change_user_name(ctx: Context<ChangeUserName>, new_name: String) -> ProgramResult {
+pub fn change_user_name(ctx: Context<ChangeUserName>, new_name: String) -> Result<()> {
     if new_name.as_bytes().len() > 200 {
         // proper error handling omitted for brevity
         panic!();
@@ -247,7 +247,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 #[program]
 mod puppet_master {
     use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, bump: u8, data: u64) -> ProgramResult {
+    pub fn pull_strings(ctx: Context<PullStrings>, bump: u8, data: u64) -> Result<()> {
         let cpi_program = ctx.accounts.puppet_program.to_account_info();
         let cpi_accounts = SetData {
             puppet: ctx.accounts.puppet.to_account_info(),
@@ -264,6 +264,7 @@ pub struct PullStrings<'info> {
     #[account(mut)]
     pub puppet: Account<'info, Data>,
     pub puppet_program: Program<'info, Puppet>,
+    /// CHECK: only used as a signing PDA
     pub authority: UncheckedAccount<'info>
 }
 ```
@@ -282,7 +283,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 #[program]
 mod puppet_master {
     use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, bump: u8, data: u64) -> ProgramResult {
+    pub fn pull_strings(ctx: Context<PullStrings>, bump: u8, data: u64) -> Result<()> {
         let bump = &[bump][..];
         puppet::cpi::set_data(
             ctx.accounts.set_data_ctx().with_signer(&[&[bump][..]]),
@@ -296,6 +297,7 @@ pub struct PullStrings<'info> {
     #[account(mut)]
     pub puppet: Account<'info, Data>,
     pub puppet_program: Program<'info, Puppet>,
+    /// CHECK: only used as a signing PDA
     pub authority: UncheckedAccount<'info>,
 }
 
