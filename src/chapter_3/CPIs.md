@@ -99,6 +99,41 @@ The `features = ["cpi"]` is used so we can not only use puppet's types but also 
 
 In the case of the puppet program, the puppet-master uses the `SetData` instruction builder struct provided by the `puppet::cpi::accounts` module to submit the accounts the `SetData` instruction of the puppet program expects. Then, the puppet-master creates a new cpi context and passes it to the `puppet::cpi::set_data` cpi function. This function has the exact same function as the `set_data` function in the puppet program with the exception that it expects a `CpiContext` instead of a `Context`.
 
+Setting up a CPI can distract from the business logic of the program so it's recommended to move the CPI setup into the `impl` block of the instruction. The puppet-master program then looks like this:
+```rust,ignore
+use anchor_lang::prelude::*;
+use puppet::cpi::accounts::SetData;
+use puppet::program::Puppet;
+use puppet::{self, Data};
+
+declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
+
+#[program]
+mod puppet_master {
+    use super::*;
+    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> Result<()> {
+        puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)
+    }
+}
+
+#[derive(Accounts)]
+pub struct PullStrings<'info> {
+    #[account(mut)]
+    pub puppet: Account<'info, Data>,
+    pub puppet_program: Program<'info, Puppet>,
+}
+
+impl<'info> PullStrings<'info> {
+    pub fn set_data_ctx(&self) -> CpiContext<'_, '_, '_, 'info, SetData<'info>> {
+        let cpi_program = self.puppet_program.to_account_info();
+        let cpi_accounts = SetData {
+            puppet: self.puppet.to_account_info()
+        };
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+```
+
 We can verify that everything works as expected by replacing the contents of the `puppet.ts` file with:
 ```ts
 import * as anchor from '@project-serum/anchor';
@@ -199,13 +234,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 mod puppet_master {
     use super::*;
     pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> Result<()> {
-        let cpi_program = ctx.accounts.puppet_program.to_account_info();
-        let cpi_accounts = SetData {
-            puppet: ctx.accounts.puppet.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info()
-        };
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        puppet::cpi::set_data(cpi_ctx, data)
+        puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)
     }
 }
 
@@ -219,14 +248,25 @@ pub struct PullStrings<'info> {
     // can not infer signers from programs called via CPIs
     pub authority: Signer<'info>
 }
+
+impl<'info> PullStrings<'info> {
+    pub fn set_data_ctx(&self) -> CpiContext<'_, '_, '_, 'info, SetData<'info>> {
+        let cpi_program = self.puppet_program.to_account_info();
+        let cpi_accounts = SetData {
+            puppet: self.puppet.to_account_info(),
+            authority: self.authority.to_account_info()
+        };
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
 ```
 
 Finally, change the test:
 
 ```ts
 import * as anchor from '@project-serum/anchor';
-import { web3 } from '@project-serum/anchor/';
 import { Program } from '@project-serum/anchor';
+import { Keypair, SystemProgram } from '@solana/web3.js';
 import { Puppet } from '../target/types/puppet';
 import { PuppetMaster } from '../target/types/puppet_master';
 import { expect } from 'chai';
@@ -237,15 +277,15 @@ describe('puppet', () => {
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
   const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
 
-  const puppetKeypair = web3.Keypair.generate();
-  const authorityKeypair = web3.Keypair.generate();
+  const puppetKeypair = Keypair.generate();
+  const authorityKeypair = Keypair.generate();
 
   it('Does CPI!', async () => {
     await puppetProgram.rpc.initialize(authorityKeypair.publicKey, {
       accounts: {
         puppet: puppetKeypair.publicKey,
         user: anchor.getProvider().wallet.publicKey,
-        systemProgram: web3.SystemProgram.programId,
+        systemProgram: SystemProgram.programId,
       },
       signers: [puppetKeypair]
     });
