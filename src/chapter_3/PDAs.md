@@ -1,15 +1,11 @@
 # PDAs
-Program derived addresses are addresses with special properties.
+
+Knowing how to use PDAs is one of the most important skills for Solana Programming.
+They simplify the programming model and make programs more secure. So what are they?
+
+PDAs (program derived addresses) are addresses with special properties.
 
 Unlike normal addresses, PDAs are not public keys and therefore do not have an associated private key. There are two use cases for PDAs. They provide a mechanism to build hashmap-like structures on-chain and they allow programs to sign instructions.
-
-Working with PDAs is one of the most challenging parts of working with Solana.
-This is why in addition to our explanations here, we want to provide you with some further resources.
-We cover everything there is to know about PDAs here but it may be useful to learn about PDAs from different perspectives.
-
-- [Pencilflips's twitter thread on PDAs](https://twitter.com/pencilflip/status/1455948263853600768?s=20&t=J2JXCwv395D7MNkX7a9LGw)
-- [jarry xiao's talk on PDAs and CPIs](https://www.youtube.com/watch?v=iMWaQRyjpl4)
-- [paulx's guide on everything Solana (covers much more than PDAs)](https://paulx.dev/blog/2021/01/14/programming-on-solana-an-introduction/)
 
 ## Creation of a PDA
 
@@ -41,7 +37,7 @@ fn find_pda(seeds, program_id) {
 It is technically possible that no bump is found within 256 tries but this probability is negligible.
 If you're interested in the exact calculation of a PDA, check out the [`solana_program` source code](https://docs.rs/solana-program/latest/solana_program/pubkey/struct.Pubkey.html#method.find_program_address).
 
-The first bump that results in a PDA is commonly called the "canonical bump". It's recommended to only use the canonical bump to avoid confusion and use the seeds if something like a counter is desired.
+The first bump that results in a PDA is commonly called the "canonical bump". Other bumps may also result in a PDA but it's recommended to only use the canonical bump to avoid confusion.
 
 ## Using PDAs
 
@@ -68,7 +64,7 @@ pub struct UserStats {
 
 The `authority` would be the user the accounts belongs to.
 
-This approach creates the following problem. It's easy to go from the user stats account to the user account address (just read the `authority` field) but if you just have the user account address (which is more likely), how do you find the user stats account? You can't. This is a problem because your game probably has instructions that require both the user stats account and its authority which means the clients needs to pass those accounts into the instruction (for example, a `ChangeName` instruction). So maybe the frontend could store a mapping between a user's account address and a user's info address in local storage. This works until the user accidentally wipes their local storage.
+This approach creates the following problem. It's easy to go from the user stats account to the user account address (just read the `authority` field) but if you just have the user account address (which is more likely), how do you find the user stats account? You can't. This is a problem because your game probably has instructions that require both the user stats account and its authority which means the client needs to pass those accounts into the instruction (for example, a `ChangeName` instruction). So maybe the frontend could store a mapping between a user's account address and a user's info address in local storage. This works until the user accidentally wipes their local storage.
 
 With PDAs you can have a layout like this:
 ```rust,ignore
@@ -88,7 +84,10 @@ let seeds = [b"user-stats", authority];
 let (pda, bump) = find_pda(seeds, game_program_id);
 ```
 
-When a user connects to your website, this pda calculation can be done client-side using their user account address as the `authority` and the resulting pda serves as the address of the user's stats account.
+When a user connects to your website, this pda calculation can be done client-side using their user account address as the `authority`. The  resulting pda then serves as the address of the user's stats account. The `b"user-stats"` is added in case there are other account types that are also PDAs. If there were an inventory account, it could be inferred using these seeds:
+```rust,ignore
+let seeds = [b"inventory", authority];
+```
 
 To summarize, we have used PDAs to create a mapping between a user and their user stats account. There is no single hashmap object that exposes a `get` function. Instead, each value (the user stats address) can be found by using certain seeds ("user-stats" and the user account address) as inputs to the `find_pda` function.
 
@@ -151,7 +150,7 @@ Additionally, we add an empty `bump` constraint to signal to anchor that it shou
 Then, in the handler, we call `ctx.bumps.get("user_stats")` to get the bump anchor found and save it to the user stats
 account as an extra property.
 
-If we then want to use the created pda in a different instruction, we can do the following:
+If we then want to use the created pda in a different instruction, we can add a new validation struct (This will check that the `user_stats` account is the pda created by running `hash(seeds, user_stats.bump, game_program_id)`):
 ```rust,ignore
 // validation struct
 #[derive(Accounts)]
@@ -160,8 +159,10 @@ pub struct ChangeUserName<'info> {
     #[account(mut, seeds = [b"user-stats", user.key().as_ref()], bump = user_stats.bump)]
     pub user_stats: Account<'info, UserStats>,
 }
-
-// handler function
+```
+and another handler function:
+```rust,ignore
+// handler function (add this next to the create_user_stats function in the game module)
 pub fn change_user_name(ctx: Context<ChangeUserName>, new_name: String) -> Result<()> {
     if new_name.as_bytes().len() > 200 {
         // proper error handling omitted for brevity
@@ -172,14 +173,12 @@ pub fn change_user_name(ctx: Context<ChangeUserName>, new_name: String) -> Resul
 }
 ```
 
-This will check that the `user_stats` account is the pda created by running `hash(seeds, user_stats.bump, game_program_id)`.
-
 Finally, let's add a test. Copy this into `game.ts`
 
 ```ts
 import * as anchor from '@project-serum/anchor';
-import { web3 } from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
+import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { Game } from '../target/types/game';
 import { expect } from 'chai';
 
@@ -190,7 +189,7 @@ anchor.setProvider(anchor.Provider.env());
   const program = anchor.workspace.Game as Program<Game>;
 
   it('Sets and changes name!', async () => {
-    const [userStatsPDA, _] = await web3.PublicKey
+    const [userStatsPDA, _] = await PublicKey
       .findProgramAddress(
         [
           anchor.utils.bytes.utf8.encode("user-stats"),
@@ -203,7 +202,7 @@ anchor.setProvider(anchor.Provider.env());
       accounts: {
         user: anchor.getProvider().wallet.publicKey,
         userStats: userStatsPDA,
-        systemProgram: web3.SystemProgram.programId
+        systemProgram: SystemProgram.programId
       }
     });
 
@@ -221,12 +220,18 @@ anchor.setProvider(anchor.Provider.env());
 });
 ```
 
-Exactly as described in the subchapter before this one, we use a `find` function to find the PDA. We can then use it just like a normal address. Well, almost. When we call `createUserStats`, we don't have to add the PDA to the `[signers]` array even though account creation requires a signature. This is because it is impossible to sign the transaction from outside the program. The signature is added when the CPI to the system program is made. We'll cover how that works now.
+Exactly as described in the subchapter before this one, we use a `find` function to find the PDA. We can then use it just like a normal address. Well, almost. When we call `createUserStats`, we don't have to add the PDA to the `[signers]` array even though account creation requires a signature. This is because it is impossible to sign the transaction from outside the program as the PDA (it's not a public key so there is no private key to sign with). Instead, the signature is added when the CPI to the system program is made. We're going to explain how this works in the [Programs as Signers](#programs-as-signers) section.
+
+#### Enforcing uniqueness
+
+A subtle result of this hashmap structure is enforced uniqueness. When `init` is used with `seeds` and `bump`, it will always search for the canonical bump. This means that it can only be called once (because the 2nd time it's called the PDA will already be initialized). To illustrate how powerful enforced uniqueness is, consider a decentralized exchange program. In this program, anyone can create a new market for two assets. However, the program creators want liquidity to be concentrated so there should only be one market for every combination of two assets. This could be done without PDAs but would require a global account that saves all the different markets. Then upon market creation, the program would check whether the asset combination exists in the global market list. With PDAs this can be done in a much more straightforward way. Any market would simply be the PDA of the mint addresses of the two assets. The program would then check whether either of the two possible PDAs (because the market could've been created with the assets in reverse order) already exists.
 
 ### Programs as Signers
 
-Creating PDAs requires them to sign the `createAccount` CPI of the system program. How does that work? PDAs are not public keys so it's impossible for them to sign anything. However, PDAs can still pseudo sign CPIs.
-In anchor, to sign with a pda you have to change `CpiContext::new(cpi_program, cpi_accounts)` to `CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)` where the `seeds` argument are the seeds and the bump the PDA was created with. 
+Creating PDAs requires them to sign the `createAccount` CPI of the system program. How does that work?
+
+PDAs are not public keys so it's impossible for them to sign anything. However, PDAs can still pseudo sign CPIs.
+In anchor, to sign with a pda you have to change `CpiContext::new(cpi_program, cpi_accounts)` to `CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)` where the `seeds` argument are the seeds _and_ the bump the PDA was created with. 
 When the CPI is invoked, for each account in `cpi_accounts` the Solana runtime will check whether`hash(seeds, current_program_id) == account address` is true. If yes, that account's `is_signer` flag will be turned to true.
 This means a PDA derived from some program X, may only be used to sign CPIs that originate from that program X. This means that on a high level, PDA signatures can be considered program signatures.
 
@@ -236,42 +241,6 @@ For instance, lending protocol programs need to manage deposited collateral and 
 Let's revisit the puppet workspace and add a PDA signature.
 
 First, adjust the puppet-master code:
-```rust,ignore
-use anchor_lang::prelude::*;
-use puppet::cpi::accounts::SetData;
-use puppet::program::Puppet;
-use puppet::{self, Data};
-
-declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
-
-#[program]
-mod puppet_master {
-    use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, bump: u8, data: u64) -> Result<()> {
-        let cpi_program = ctx.accounts.puppet_program.to_account_info();
-        let cpi_accounts = SetData {
-            puppet: ctx.accounts.puppet.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info()
-        };
-        let bump = &[bump][..];
-        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, &[&[bump][..]]);
-        puppet::cpi::set_data(cpi_ctx, data)
-    }
-}
-
-#[derive(Accounts)]
-pub struct PullStrings<'info> {
-    #[account(mut)]
-    pub puppet: Account<'info, Data>,
-    pub puppet_program: Program<'info, Puppet>,
-    /// CHECK: only used as a signing PDA
-    pub authority: UncheckedAccount<'info>
-}
-```
-
-The `authority` account is now an `UncheckedAccount` instead of a `Signer`. When the puppet-master is invoked, the `authority` pda is not a signer yet so we mustn't add a check for it. We just care about the puppet-master being able to sign so we don't add any additional seeds. Just a bump that is calculated off-chain and then passed to the function.
-
-Setting up a CPI can distract from the business logic of the program so it's recommended to move the CPI setup into the `impl` block of the instruction. The puppet-master program then looks like this:
 ```rust,ignore
 use anchor_lang::prelude::*;
 use puppet::cpi::accounts::SetData;
@@ -313,12 +282,13 @@ impl<'info> PullStrings<'info> {
 }
 ```
 
+The `authority` account is now an `UncheckedAccount` instead of a `Signer`. When the puppet-master is invoked, the `authority` pda is not a signer yet so we mustn't add a check for it. We just care about the puppet-master being able to sign so we don't add any additional seeds. Just a bump that is calculated off-chain and then passed to the function.
 
 Finally, this is the new `puppet.ts`:
 ```ts
 import * as anchor from '@project-serum/anchor';
-import { web3 } from '@project-serum/anchor/';
 import { Program } from '@project-serum/anchor';
+import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { Puppet } from '../target/types/puppet';
 import { PuppetMaster } from '../target/types/puppet_master';
 import { expect } from 'chai';
@@ -329,17 +299,17 @@ describe('puppet', () => {
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
   const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
 
-  const puppetKeypair = web3.Keypair.generate();
+  const puppetKeypair = Keypair.generate();
 
   it('Does CPI!', async () => {
-    const [puppetMasterPDA, puppetMasterBump] = await web3.PublicKey
+    const [puppetMasterPDA, puppetMasterBump] = await PublicKey
       .findProgramAddress([], puppetMasterProgram.programId);
 
     await puppetProgram.rpc.initialize(puppetMasterPDA, {
       accounts: {
         puppet: puppetKeypair.publicKey,
         user: anchor.getProvider().wallet.publicKey,
-        systemProgram: web3.SystemProgram.programId,
+        systemProgram: SystemProgram.programId,
       },
       signers: [puppetKeypair]
     });
@@ -360,12 +330,23 @@ describe('puppet', () => {
 
 The `authority` is no longer a randomly generated keypair but a PDA derived from the puppet-master program. This means the puppet-master can sign with it which it does inside `pullStrings`. It's worth noting that our implementation also allows non-canonical bumps but again because we are only interesting in being able to sign we don't care which bump is used.
 
+> In some cases it's possible to reduce the number of accounts you need by making a PDA storing state also sign a CPI instead of defining a separate PDA to do that.
+
 ## PDAs: Conclusion
 
-This section serves as a brief recap of all the different things you can do with PDAs.
+This section serves as a brief recap of the different things you can do with PDAs.
 
 First, you can create hashmaps with them. We created a user stats PDA which was derived from the user address. This derivation linked the user address and the user stats account, allowing the latter to be easily found given the former.
-
-A subtle result of this hashmap structure is enforced uniqueness. When `init` is used with `seeds` and `bump`, it will always search for the canonical bump. This means that it can only be called once (because the 2nd time it's called the PDA will already be initialized). To illustrate how powerful enforced uniqueness is, consider a decentralized exchange program. In this program, anyone can create a new market for two assets. However, the program creators want liquidity to be concentrated so there should only be one market for every combination of two assets. This could be done without PDAs but would require a global account that saves all the different markets. Then upon market creation, the program would check whether the asset combination exists in the global market list. With PDAs this can be done much more straightforward. Any market would simply be the PDA of the mint addresses of the two assets. The program would then check whether either of the two possible PDAs (because the market could've been created with the assets in reverse order) already exists.
+Hashmaps also result in enforced uniqueness which can be used in many different ways, e.g. for only allowing one market per two assets in a decentralized exchange.
 
 Secondly, PDAs can be used to allow programs to sign CPIs. This means that programs can be given control over assets which they then manage according to the rules defined in their code.
+
+You can even combine these two use cases and use a PDA that's used in an instruction as a state account to also sign a CPI.
+
+Admittedly, working with PDAs is one of the most challenging parts of working with Solana.
+This is why in addition to our explanations here, we want to provide you with some further resources.
+While we've covered everything you need to know about PDAs here, it may be useful to learn about PDAs from different perspectives.
+
+- [Pencilflips's twitter thread on PDAs](https://twitter.com/pencilflip/status/1455948263853600768?s=20&t=J2JXCwv395D7MNkX7a9LGw)
+- [jarry xiao's talk on PDAs and CPIs](https://www.youtube.com/watch?v=iMWaQRyjpl4)
+- [paulx's guide on everything Solana (covers much more than PDAs)](https://paulx.dev/blog/2021/01/14/programming-on-solana-an-introduction/)
