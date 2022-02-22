@@ -19,29 +19,14 @@ brew upgrade
 brew install mdbook
 ```
 
-Next, clone this repo and run `mbdbook` to build the book:
+Next, clone this repo and and serve the book:
 
 ```sh
 git clone https://github.com/project-serum/anchor-book.git
 cd anchor-book
-mdbook build
+mdbook serve
 ```
-
-Now, assuming you have [node.js](https://nodejs.org) and
-[npm](https://npmjs.com) installed, install `serve`, a static file server.
-
-```sh
-npm i -g serve
-```
-
-Now, run:
-
-```sh
-cd book && serve
-```
-
-and then navigate to `http://localhost:3000`
-in your browser.
+The book will be available at `http://localhost:3000` in your browser.
 
 ## License
 
