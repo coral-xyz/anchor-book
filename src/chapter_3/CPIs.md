@@ -320,9 +320,9 @@ The test passes because the signature that was given to the puppet-master by the
 In the puppet program, the `Account<'info, T>` type is used for the `puppet` account. If a CPI edits an account of that type,
 the caller's account does not change during the instruction.
 
-You can easily see this for yourself by adding the following right after the `puppet::cpi::set_data(cpi_ctx, data)` cpi call.
+You can easily see this for yourself by adding the following right after the `puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)` cpi call.
 ```rust,ignore
-puppet::cpi::set_data(cpi_ctx, data)?;
+puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)?;
 if ctx.accounts.puppet.data != 42 {
     panic!();
 }
@@ -330,12 +330,12 @@ Ok(())
 ```
 Now your test will fail. But why? After all the test used to pass, so the cpi definitely did change the `data` field to `42`.
 
-The reason the `data` field has not been updated to `42` in the caller is that the `Account<'info, T>` type deserializes the incoming bytes into new struct. This struct is no longer connected to the underlying data in the account. The CPI changes the data in the underlying account but since the struct in the caller has no connection to the underlying account the struct in the caller remains unchanged.
+The reason the `data` field has not been updated to `42` in the caller is that at the beginning of the instruction the `Account<'info, T>` type deserializes the incoming bytes into a new struct. This struct is no longer connected to the underlying data in the account. The CPI changes the data in the underlying account but since the struct in the caller has no connection to the underlying account the struct in the caller remains unchanged.
 
 If you need to read the value of an account that has just been changed by a CPI, you can call its `reload` method which will re-deserialize the account. If you put `ctx.accounts.puppet.reload()?;` right after the cpi call, the test will pass again.
 
 ```rust,ignore
-puppet::cpi::set_data(cpi_ctx, data)?;
+puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)?;
 ctx.accounts.puppet.reload()?;
 if ctx.accounts.puppet.data != 42 {
     panic!();
