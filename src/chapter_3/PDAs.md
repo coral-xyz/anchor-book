@@ -345,7 +345,6 @@ You can even combine these two use cases and use a PDA that's used in an instruc
 
 Admittedly, working with PDAs is one of the most challenging parts of working with Solana.
 This is why in addition to our explanations here, we want to provide you with some further resources.
-While we've covered everything you need to know about PDAs here, it may be useful to learn about PDAs from different perspectives.
 
 - [Pencilflips's twitter thread on PDAs](https://twitter.com/pencilflip/status/1455948263853600768?s=20&t=J2JXCwv395D7MNkX7a9LGw)
 - [jarry xiao's talk on PDAs and CPIs](https://www.youtube.com/watch?v=iMWaQRyjpl4)
