@@ -109,7 +109,7 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod game {
     use super::*;
     // handler function
-    pub fn create_user_stats(ctx: Context<CreateUserStats>, name: String) -> Result<()> {
+    pub fn create_user_stats(ctx: Context<CreateUserStats>, name: String) -> ProgramResult {
         let user_stats = &mut ctx.accounts.user_stats;
         user_stats.level = 0;
         if name.as_bytes().len() > 200 {
@@ -163,7 +163,7 @@ pub struct ChangeUserName<'info> {
 and another handler function:
 ```rust,ignore
 // handler function (add this next to the create_user_stats function in the game module)
-pub fn change_user_name(ctx: Context<ChangeUserName>, new_name: String) -> Result<()> {
+pub fn change_user_name(ctx: Context<ChangeUserName>, new_name: String) -> ProgramResult {
     if new_name.as_bytes().len() > 200 {
         // proper error handling omitted for brevity
         panic!();
@@ -252,7 +252,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 #[program]
 mod puppet_master {
     use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, bump: u8, data: u64) -> Result<()> {
+    pub fn pull_strings(ctx: Context<PullStrings>, bump: u8, data: u64) -> ProgramResult {
         let bump = &[bump][..];
         puppet::cpi::set_data(
             ctx.accounts.set_data_ctx().with_signer(&[&[bump][..]]),

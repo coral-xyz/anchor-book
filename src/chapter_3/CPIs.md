@@ -21,11 +21,11 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 #[program]
 pub mod puppet {
     use super::*;
-    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
+    pub fn initialize(_ctx: Context<Initialize>) -> ProgramResult {
         Ok(())
     }
 
-    pub fn set_data(ctx: Context<SetData>, data: u64) -> Result<()> {
+    pub fn set_data(ctx: Context<SetData>, data: u64) -> ProgramResult {
         let puppet = &mut ctx.accounts.puppet;
         puppet.data = data;
         Ok(())
@@ -72,7 +72,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 #[program]
 mod puppet_master {
     use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> Result<()> {
+    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> ProgramResult {
         let cpi_program = ctx.accounts.puppet_program.to_account_info();
         let cpi_accounts = SetData {
             puppet: ctx.accounts.puppet.to_account_info(),
@@ -111,7 +111,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 #[program]
 mod puppet_master {
     use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> Result<()> {
+    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> ProgramResult {
         puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)
     }
 }
@@ -191,7 +191,7 @@ pub struct Data {
 
 and adjust the `initialize` function:
 ```rust,ignore
-pub fn initialize(ctx: Context<Initialize>, authority: Pubkey) -> Result<()> {
+pub fn initialize(ctx: Context<Initialize>, authority: Pubkey) -> ProgramResult {
     ctx.accounts.puppet.authority = authority;
     Ok(())
 }
@@ -233,7 +233,7 @@ declare_id!("HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L");
 #[program]
 mod puppet_master {
     use super::*;
-    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> Result<()> {
+    pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> ProgramResult {
         puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)
     }
 }

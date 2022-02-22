@@ -23,7 +23,7 @@ To actually throw an error use the [`err!`](https://docs.rs/anchor-lang/latest/a
 #[program]
 mod hello_anchor {
     use super::*;
-    pub fn set_data(ctx: Context<SetData>, data: MyAccount) -> Result<()> {
+    pub fn set_data(ctx: Context<SetData>, data: MyAccount) -> ProgramResult {
         if data.data >= 100 {
             return err!(MyError::DataTooLarge);    
         }
@@ -47,7 +47,7 @@ You can use the [`require`](https://docs.rs/anchor-lang/latest/anchor_lang/macro
 #[program]
 mod hello_anchor {
     use super::*;
-    pub fn set_data(ctx: Context<SetData>, data: MyAccount) -> Result<()> {
+    pub fn set_data(ctx: Context<SetData>, data: MyAccount) -> ProgramResult {
         require!(data.data < 100, MyError::DataTooLarge); 
         ctx.accounts.my_account.set_inner(data);
         Ok(())

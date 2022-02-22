@@ -109,7 +109,7 @@ And with this, `SetupGame` is complete and we can move on to the `setup_game` fu
 
 Let's start by adding an argument to the `setup_game` function.
 ```rust,ignore
-pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> Result<()> {
+pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> ProgramResult {
     Ok(())
 }
 ```
@@ -117,7 +117,7 @@ Why didn't we just add `player_two` as an account in the accounts struct? There 
 
 Finish the instruction function by setting the game to its initial values:
 ```rust,ignore
-pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> Result<()> {
+pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> ProgramResult {
     let game = &mut ctx.accounts.game;
     game.players = [ctx.accounts.player_one.key(), player_two];
     game.turn = 1;
@@ -206,7 +206,7 @@ impl Game {
         self.players[self.current_player_index()]
     }
 
-    pub fn play(&mut self, tile: &Tile) -> Result<()> {
+    pub fn play(&mut self, tile: &Tile) -> ProgramResult {
         if !self.is_active() {
             return err!(TicTacToeError::GameAlreadyOver);
         }
@@ -317,7 +317,7 @@ pub enum TicTacToeError {
 
 Finally, we can add the `play` function inside the program module.
 ```rust,ignore
-pub fn play(ctx: Context<Play>, tile: Tile) -> Result<()> {
+pub fn play(ctx: Context<Play>, tile: Tile) -> ProgramResult {
     let game = &mut ctx.accounts.game;
 
     require!(
