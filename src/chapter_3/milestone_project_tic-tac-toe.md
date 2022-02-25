@@ -1,4 +1,6 @@
 # Milestone Project - Tic-Tac-Toe
+> [Program Code](https://github.com/project-serum/anchor-book/tree/master/programs/tic-tac-toe)
+
 You're now ready to build your first anchor project. Create a new anchor workspace with
 
 ```

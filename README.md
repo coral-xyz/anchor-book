@@ -7,6 +7,10 @@ Solana apps.
 
 Feel free to file an issue or submit a pull request.
 
+## Programs
+
+You can find the program examples used in the book in the [programs directory](./programs/).
+
 ## 💻 Run The Anchor Book Locally
 
 To run on a Mac, install [Homebrew](https://brew.sh/) if you don't already have
