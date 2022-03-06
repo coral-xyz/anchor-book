@@ -88,7 +88,7 @@ impl Game {
 
         self.update_state();
 
-        if let GameState::Active = self.state {
+        if GameState::Active == self.state {
             self.turn += 1;
         }
 
