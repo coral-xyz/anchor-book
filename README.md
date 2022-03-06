@@ -32,6 +32,11 @@ mdbook serve
 ```
 The book will be available at `http://localhost:3000` in your browser.
 
+### Run an older version
+
+If you want to know how something worked in previous versions of anchor, you can check out
+a tag e.g. tag `v0.22.0` is the last commit of the book that was compatible with anchor version `0.22.0`
+
 ## License
 
 The Anchor Book is licensed under [Apache 2.0](./LICENSE).
