@@ -35,7 +35,7 @@ The book will be available at `http://localhost:3000` in your browser.
 ### Run an older version
 
 If you want to know how something worked in previous versions of anchor, you can check out
-a tag e.g. tag `v0.22.0` is the last commit of the book that was compatible with anchor version `0.22.0`.
+a branch e.g. branch `v0.21.0` is the branch with all commits of the book that were made before anchor `v0.22.0` was released.
 
 ## License
 
