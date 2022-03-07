@@ -4,8 +4,7 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-use instructions::setup_game::*;
-use instructions::play::*;
+use instructions::*;
 use state::game::Tile;
 
 // this key needs to be changed to whatever public key is returned by "anchor keys list"
