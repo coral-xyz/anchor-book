@@ -51,6 +51,7 @@ There may be cases where you want your program to interact with a non-Anchor pro
 
 ```rust,ignore
 use anchor_lang::prelude::*;
+use anchor_spl::token::TokenAccount;
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
@@ -84,6 +85,8 @@ pub struct SetData<'info> {
     pub owner: Signer<'info>
 }
 ```
+
+Add `anchor-spl = "0.22.1"` (at the time of writing current version is 0.22.1) in your `Cargo.toml`, located in `programs/<your-project-name>/` directory.
 
 In this example, we set the `data` field of an account if the caller has admin rights. We decide whether the caller is an admin by checking whether they own admin tokens for the account they want to change. We do most of this via constraints which we will look at in the next section.
 The important thing to take away is that we use the `TokenAccount` type (that wraps around the token program's `Account` struct and adds the required functions) to make anchor ensure that the incoming account is owned by the token program and to make anchor deserialize it. This means we can use the `TokenAccount` properties inside our constraints (e.g. `token_account.mint`) as well as in the instruction function.
