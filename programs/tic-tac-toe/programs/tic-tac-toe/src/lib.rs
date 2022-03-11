@@ -1,11 +1,10 @@
 use anchor_lang::prelude::*;
+use instructions::*;
+use state::game::Tile;
 
 pub mod errors;
 pub mod instructions;
 pub mod state;
-
-use instructions::*;
-use state::game::Tile;
 
 // this key needs to be changed to whatever public key is returned by "anchor keys list"
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");

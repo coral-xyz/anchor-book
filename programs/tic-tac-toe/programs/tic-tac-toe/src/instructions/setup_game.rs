@@ -1,6 +1,5 @@
-use anchor_lang::prelude::*;
-
 use crate::state::game::*;
+use anchor_lang::prelude::*;
 
 pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> Result<()> {
     let game = &mut ctx.accounts.game;

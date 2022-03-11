@@ -1,7 +1,6 @@
-use anchor_lang::prelude::*;
-
 use crate::errors::TicTacToeError;
 use crate::state::game::*;
+use anchor_lang::prelude::*;
 
 pub fn play(ctx: Context<Play>, tile: Tile) -> Result<()> {
     let game = &mut ctx.accounts.game;

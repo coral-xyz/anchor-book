@@ -1,9 +1,8 @@
+use crate::errors::TicTacToeError;
 use anchor_lang::prelude::*;
 use num_derive::*;
 use num_traits::*;
 use std::mem;
-
-use crate::errors::TicTacToeError;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct Tile {
@@ -49,9 +48,8 @@ impl Game {
     }
 
     pub fn play(&mut self, tile: &Tile) -> Result<()> {
-        if !self.is_active() {
-            return Err(TicTacToeError::GameAlreadyOver.into());
-        }
+        require!(self.is_active(), TicTacToeError::GameAlreadyOver);
+
         match tile {
             tile @ Tile {
                 row: 0..=2,

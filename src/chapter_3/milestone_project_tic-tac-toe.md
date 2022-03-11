@@ -9,6 +9,8 @@ anchor init tic-tac-toe
 
 The program will have 2 instructions. First, we need to setup the game. We need to save who is playing it and create a board to play on. Then, the player take turns until there is a winner or a tie.
 
+We recommend to keep programs in a single `lib.rs` file until they get too big. We would keep this program in a single file too but have split up the reference implementation for demonstration purposes. Check out the section at the end of this chapter to learn how to split up a program into multiple files.
+
 ## Setting up the game
 
 ### State
@@ -209,9 +211,8 @@ impl Game {
     }
 
     pub fn play(&mut self, tile: &Tile) -> Result<()> {
-        if !self.is_active() {
-            return err!(TicTacToeError::GameAlreadyOver);
-        }
+        require!(self.is_active(), TicTacToeError::GameAlreadyOver);
+
         match tile {
             tile
             @ Tile {
@@ -492,5 +493,31 @@ Here is your deployment checklist 🚀
 6. Run `anchor test`
 
 There is more to deployments than this e.g. understanding how the BPFLoader works, how to manage keys, how to upgrade your programs and more. Keep reading to learn more!
+
+## Program directory organization
+> [Program Code](https://github.com/project-serum/anchor-book/tree/master/programs/tic-tac-toe)
+
+Eventually, some programs become too big to keep them in a single file and it makes sense to break them up. 
+
+Splitting a program into multiple files works almost the exact same way as splitting up a regular rust program, so if you haven't already, now is the time to read all about that in the [rust book](https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html).
+
+We recommend the following directory structure (using the tic-tac-toe program as an example):
+```
+.
++-- lib.rs
++-- errors.rs
++-- instructions
+|   +-- play.rs
+|   +-- setup_game.rs
+|   +-- mod.rs
++-- state
+|   +-- game.rs
+|   +-- mod.rs
+```
+
+The crucial difference to a normal rust layout is the way that instructions have to be imported. The `lib.rs` file has to import each instruction module with a wildcard import (e.g. `use instructions::play::*;`). This has to be done because the `#[program]` macro depends on generated code inside each instruction file.
+
+To make the imports shorter you can re-export the instruction modules in the `mod.rs` file in the instructions directory with the `pub use` syntax and then import all instructions in the `lib.rs` file with `use instructions::*;`.
+
 
 Well done! You've finished the essentials section. You can now move on to the more advanced parts of Anchor.
