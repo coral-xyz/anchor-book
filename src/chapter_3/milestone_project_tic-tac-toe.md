@@ -176,6 +176,9 @@ Now, run `anchor test`. This starts up (and subsequently shuts down) a local val
 > This is likely because the test file is looking for types from your program that haven't been generated yet.
 > To generate them, run `anchor build`. This builds the program and creates the idl and typescript types.
 
+
+If you get the error `Error: Unable to read keypair file` when running the test, you likely need to generate a Solana keypair using `solana-keygen new`.
+
 ## Playing the game
 
 ### The Play Instruction
