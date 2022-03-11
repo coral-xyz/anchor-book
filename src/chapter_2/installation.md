@@ -6,7 +6,7 @@ Go [here](https://www.rust-lang.org/tools/install) to install Rust.
 
 ## Solana
 
-Go [here](https://docs.solana.com/cli/install-solana-cli-tools) to install Solana.
+Go [here](https://docs.solana.com/cli/install-solana-cli-tools) to install Solana and then run `solana-keygen new` to create a keypair at the default location. Anchor uses this keypair to run your program tests.
 
 ## Yarn
 
