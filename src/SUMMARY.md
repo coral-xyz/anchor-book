@@ -28,9 +28,9 @@
   - [AVM](./chapter_4/avm.md)
   - [IDL]()
 - [Anchor BTS]()
+  - [Dispatch]()
+  - [The Discriminator]()
 
 ---
 
 - [Reference Links](./reference_links.md)
-  - [Dispatch]()
-  - [The Discriminator]()
