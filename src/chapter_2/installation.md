@@ -24,9 +24,10 @@ Install `avm` using Cargo. Note this will replace your `anchor` binary if you ha
 cargo install --git https://github.com/project-serum/anchor avm --locked --force
 ```
 
-Install the latest version of the CLI using `avm`. You can also use the command to upgrade to the latest release in the future.
+Install the latest version of the CLI using `avm`, and then set it to be the version to use.
 
 ```
+avm install latest
 avm use latest
 ```
 
