@@ -23,6 +23,7 @@ SUBCOMMANDS:
     init       Initializes a workspace
     migrate    Runs the deploy migration script
     new        Creates a new program
+    shell      Starts a node shell with an Anchor client setup according to the local config
     test       Runs integration tests against a localnetwork
     upgrade    Upgrades a single program. The configured wallet must be the upgrade authority
     verify     Verifies the on-chain bytecode matches the locally compiled artifact. Run this
@@ -199,6 +200,14 @@ anchor new <program-name>
 ```
 
 Creates a new program in the workspace's `programs/` directory initialized with boilerplate.
+
+## Shell
+
+```
+anchor shell
+```
+
+Starts a node shell with an Anchor client setup according to the local config.
 
 ## Test
 
