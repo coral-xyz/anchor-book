@@ -23,14 +23,14 @@
     - [Access Control]()
     - [Building & Testing]()
     - [Milestone Project - The Nightclub]()
-- [Anchor Periphery](./chapter_4/anchor_periphery.md)
-  - [CLI](./chapter_4/cli.md)
-  - [AVM](./chapter_4/avm.md)
-  - [IDL]()
 - [Anchor BTS]()
   - [Dispatch]()
   - [The Discriminator]()
 
 ---
 
+- [Anchor Tooling](./chapter_5/anchor_tooling.md)
+  - [CLI Reference](./chapter_5/cli.md)
+  - [AVM Reference](./chapter_5/avm.md)
+  - [Anchor.toml Reference](./chapter_5/anchor-toml_reference.md)
 - [Reference Links](./reference_links.md)
