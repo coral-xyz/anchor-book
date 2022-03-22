@@ -4,35 +4,22 @@ use num_derive::*;
 use num_traits::*;
 use std::mem;
 
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct Tile {
-    row: u8,
-    column: u8,
-}
-
 #[account]
-#[derive(Default)]
 pub struct Game {
-    players: [Pubkey; 2],          // 64
+    players: [Pubkey; 2],          // (32 * 2)
     turn: u8,                      // 1
     board: [[Option<Sign>; 3]; 3], // 9 * (1 + 1) = 18
     state: GameState,              // 32 + 1
 }
 
 impl Game {
-    pub const MAXIMUM_SIZE: usize = mem::size_of::<Game>() + 9;
+    pub const MAXIMUM_SIZE: usize = (32 * 2) + 1 + (9 * (1 + 1)) + (32 + 1);
 
-    pub fn start(&mut self) -> Result<()> {
-        if self.turn == 0 {
-            self.turn = 1;
-            Ok(())
-        } else {
-            err!(TicTacToeError::GameAlreadyStarted)
-        }
-    }
-
-    pub fn set_players(&mut self, players: [Pubkey; 2]) {
+    pub fn start(&mut self, players: [Pubkey; 2]) -> Result<()> {
+        require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
         self.players = players;
+        self.turn = 1;
+        Ok(())
     }
 
     pub fn is_active(&self) -> bool {
@@ -132,16 +119,16 @@ pub enum GameState {
     Won { winner: Pubkey },
 }
 
-impl Default for GameState {
-    fn default() -> Self {
-        Self::Active
-    }
-}
-
 #[derive(
     AnchorSerialize, AnchorDeserialize, FromPrimitive, ToPrimitive, Copy, Clone, PartialEq, Eq,
 )]
 pub enum Sign {
     X,
     O,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct Tile {
+    row: u8,
+    column: u8,
 }

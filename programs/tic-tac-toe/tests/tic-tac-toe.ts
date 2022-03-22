@@ -1,5 +1,5 @@
 import * as anchor from '@project-serum/anchor';
-import { Program } from '@project-serum/anchor';
+import { AnchorError, Program } from '@project-serum/anchor';
 import { TicTacToe } from '../target/types/tic_tac_toe';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -109,8 +109,13 @@ describe('tic-tac-toe', () => {
         ]
       );
       chai.assert(false, "should've failed but didn't ");
-    } catch (err) {
-      expect(err.code).to.equal(6003);
+    } catch (_err) {
+      expect(_err).to.be.instanceOf(AnchorError);
+      const err: AnchorError = _err;
+      expect(err.error.errorCode.code).to.equal("NotPlayersTurn");
+      expect(err.error.errorCode.number).to.equal(6003);
+      expect(err.program.equals(program.programId)).is.true;
+      expect(err.error.comparedValues).to.deep.equal([playerTwo.publicKey, playerOne.publicKey]);
     }
 
     await play(
@@ -156,8 +161,11 @@ describe('tic-tac-toe', () => {
         ]
       );
       chai.assert(false, "should've failed but didn't ");
-    } catch (error) {
-      expect(error.code).to.equal(6000);
+    } catch (_err) {
+      expect(_err).to.be.instanceOf(AnchorError);
+      const err: AnchorError = _err;
+      expect(err.error.errorCode.number).to.equal(6000);
+      expect(err.error.errorCode.code).to.equal("TileOutOfBounds");
     }
 
     await play(
@@ -189,8 +197,10 @@ describe('tic-tac-toe', () => {
         ]
       );
       chai.assert(false, "should've failed but didn't ");
-    } catch (error) {
-      expect(error.code).to.equal(6001);
+    } catch (_err) {
+      expect(_err).to.be.instanceOf(AnchorError);
+      const err: AnchorError = _err;
+      expect(err.error.errorCode.number).to.equal(6001);
     }
 
     await play(
@@ -222,8 +232,10 @@ describe('tic-tac-toe', () => {
         ]
       );
       chai.assert(false, "should've failed but didn't ");
-    } catch (error) {
-      expect(error.code).to.equal(6002);
+    } catch (_err) {
+      expect(_err).to.be.instanceOf(AnchorError);
+      const err: AnchorError = _err;
+      expect(err.error.errorCode.number).to.equal(6002);
     }
   })
 
