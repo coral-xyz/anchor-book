@@ -5,8 +5,9 @@ use anchor_lang::prelude::*;
 pub fn play(ctx: Context<Play>, tile: Tile) -> Result<()> {
     let game = &mut ctx.accounts.game;
 
-    require!(
-        game.current_player() == ctx.accounts.player.key(),
+    require_keys_eq!(
+        game.current_player(),
+        ctx.accounts.player.key(),
         TicTacToeError::NotPlayersTurn
     );
 

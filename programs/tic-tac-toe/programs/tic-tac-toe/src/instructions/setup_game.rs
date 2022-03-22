@@ -2,9 +2,9 @@ use crate::state::game::*;
 use anchor_lang::prelude::*;
 
 pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> Result<()> {
-    let game = &mut ctx.accounts.game;
-    game.set_players([ctx.accounts.player_one.key(), player_two]);
-    game.start()
+    ctx.accounts
+        .game
+        .start([ctx.accounts.player_one.key(), player_two])
 }
 
 #[derive(Accounts)]
