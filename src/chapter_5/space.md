@@ -2,6 +2,8 @@
 
 This reference tells you how much space you should allocate for an account.
 
+In addition to the space for the account data, you have to add `8` to the `space` constraint for Anchor's internal discriminator (see the example).
+
 | Types           | Space in bytes                    | Details/Example    
 | --------------- | --------------------              | ----------- 
 | bool            | 1                                 | would only require 1 bit but still uses 1 byte
