@@ -29,8 +29,9 @@
 
 ---
 
-- [Anchor Tooling](./chapter_5/anchor_tooling.md)
+- [Anchor References](./chapter_5/anchor_references.md)
+  - [Space Reference](./chapter_5/space.md)
   - [CLI Reference](./chapter_5/cli.md)
   - [AVM Reference](./chapter_5/avm.md)
   - [Anchor.toml Reference](./chapter_5/anchor-toml_reference.md)
-- [Reference Links](./reference_links.md)
+  - [Code References](./chapter_5/reference_links.md)
