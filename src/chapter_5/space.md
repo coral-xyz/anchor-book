@@ -1,6 +1,8 @@
 # Space Reference
 
 This reference tells you how much space you should allocate for an account.
+This only applies to accounts that don't use `zero-copy`. `zero-copy` uses `repr(C)` with a pointer cast,
+so there the `C` layout applies.
 
 In addition to the space for the account data, you have to add `8` to the `space` constraint for Anchor's internal discriminator (see the example).
 
