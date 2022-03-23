@@ -1,4 +1,4 @@
-# Reference Links
+# Code References
 
 - [Accounts Reference](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/index.html)
 - [Constraints Reference](https://docs.rs/anchor-lang/latest/anchor_lang/derive.Accounts.html)
