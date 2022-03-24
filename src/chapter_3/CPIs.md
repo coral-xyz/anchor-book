@@ -367,7 +367,7 @@ Defining a return type that isn't the unit type `()` will cause Anchor to transp
         let result = puppet::cpi::set_data(cpi_ctx, data)
         // The below statement calls sol_get_return and deserializes the result
         // `return_data` contains the return from `set_data`, which is just `data`
-        let return_data = result.get().unwrap();
+        let return_data = result.get();
     }
 ```
 
