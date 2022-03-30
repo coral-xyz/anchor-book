@@ -280,14 +280,14 @@ Time to test our code! Head over into the `tests` folder in the root directory. 
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = program.provider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
-    await program.rpc.setupGame(playerTwo.publicKey, {
-      accounts: {
+    await program.methods
+      .setupGame(playerTwo.publicKey)
+      .accounts({
         game: gameKeypair.publicKey,
         playerOne: playerOne.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId
-      },
-      signers: [gameKeypair]
-    });
+      })
+      .signers([gameKeypair])
+      .rpc();
 
     let gameState = await program.account.game.fetch(gameKeypair.publicKey);
     expect(gameState.turn).to.equal(1);
@@ -360,13 +360,14 @@ Testing the `play` instruction works the exact same way. To avoid repeating your
 ```typescript
 async function play(program, game, player,
     tile, expectedTurn, expectedGameState, expectedBoard) {
-  await program.rpc.play(tile, {
-    accounts: {
+  await program.methods
+    .play(tile)
+    .accounts({
       player: player.publicKey,
       game
-    },
-    signers: player instanceof (anchor.Wallet as any) ? [] : [player]
-  });
+    })
+    .signers(player instanceof (anchor.Wallet as any) ? [] : [player])
+    .rpc();
 
   const gameState = await program.account.game.fetch(game);
   expect(gameState.turn).to.equal(expectedTurn);
@@ -383,14 +384,15 @@ it('player one wins', async() => {
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = program.provider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
-    await program.rpc.setupGame(playerTwo.publicKey, {
-      accounts: {
+    await program
+      .rpc
+      .setupGame(playerTwo.publicKey)
+      .accounts({
         game: gameKeypair.publicKey,
         playerOne: playerOne.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId
-      },
-      signers: [gameKeypair]
-    });
+      })
+      .signers([gameKeypair])
+      .rpc();
 
     let gameState = await program.account.game.fetch(gameKeypair.publicKey);
     expect(gameState.turn).to.equal(1);

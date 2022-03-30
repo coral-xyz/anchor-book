@@ -7,13 +7,14 @@ import { expect } from 'chai';
 chai.use(chaiAsPromised);
 
 async function play(program, game, player, tile, expectedTurn, expectedGameState, expectedBoard) {
-  await program.rpc.play(tile, {
-    accounts: {
+  await program.methods
+    .play(tile)
+    .accounts({
       player: player.publicKey,
       game
-    },
-    signers: player instanceof (anchor.Wallet as any) ? [] : [player]
-  });
+    })
+    .signers(player instanceof (anchor.Wallet as any) ? [] : [player])
+    .rpc();
 
   const gameState = await program.account.game.fetch(game);
   expect(gameState.turn).to.equal(expectedTurn);
@@ -33,14 +34,14 @@ describe('tic-tac-toe', () => {
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = program.provider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
-    await program.rpc.setupGame(playerTwo.publicKey, {
-      accounts: {
+    await program.methods
+      .setupGame(playerTwo.publicKey)
+      .accounts({
         game: gameKeypair.publicKey,
         playerOne: playerOne.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId
-      },
-      signers: [gameKeypair]
-    });
+      })
+      .signers([gameKeypair])
+      .rpc();
 
     let gameState = await program.account.game.fetch(gameKeypair.publicKey);
     expect(gameState.turn).to.equal(1);
@@ -57,14 +58,14 @@ describe('tic-tac-toe', () => {
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = program.provider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
-    await program.rpc.setupGame(playerTwo.publicKey, {
-      accounts: {
+    await program.methods
+      .setupGame(playerTwo.publicKey)
+      .accounts({
         game: gameKeypair.publicKey,
         playerOne: playerOne.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId
-      },
-      signers: [gameKeypair]
-    });
+      })
+      .signers([gameKeypair])
+      .rpc();
 
     let gameState = await program.account.game.fetch(gameKeypair.publicKey);
     expect(gameState.turn).to.equal(1);
@@ -243,14 +244,14 @@ describe('tic-tac-toe', () => {
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = program.provider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
-    await program.rpc.setupGame(playerTwo.publicKey, {
-      accounts: {
+    await program.methods
+      .setupGame(playerTwo.publicKey)
+      .accounts({
         game: gameKeypair.publicKey,
         playerOne: playerOne.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId
-      },
-      signers: [gameKeypair]
-    });
+      })
+      .signers([gameKeypair])
+      .rpc();
 
     let gameState = await program.account.game.fetch(gameKeypair.publicKey);
     expect(gameState.turn).to.equal(1);
