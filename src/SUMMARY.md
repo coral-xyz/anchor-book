@@ -17,7 +17,7 @@
   - [Intermediate](./chapter_3/intermediate.md)
     - [Cross-Program Invocations](./chapter_3/CPIs.md)
     - [PDAs](./chapter_3/PDAs.md)
-    - [Events]()
+    - [Events](./chapter_3/events.md)
     - [Constants]()
     - [Zero-Copy]()
     - [Access Control]()
