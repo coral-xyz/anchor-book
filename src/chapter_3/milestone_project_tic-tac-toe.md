@@ -7,7 +7,7 @@ You're now ready to build your first anchor project. Create a new anchor workspa
 anchor init tic-tac-toe
 ```
 
-The program will have 2 instructions. First, we need to setup the game. We need to save who is playing it and create a board to play on. Then, the player take turns until there is a winner or a tie.
+The program will have 2 instructions. First, we need to setup the game. We need to save who is playing it and create a board to play on. Then, the players take turns until there is a winner or a tie.
 
 We recommend keeping programs in a single `lib.rs` file until they get too big. We would not split up this project into multiple files either but there is a section at the end of this chapter that explains how to do it for this and other programs.
 
@@ -15,7 +15,7 @@ We recommend keeping programs in a single `lib.rs` file until they get too big. 
 
 ### State
 
-Let's begin by thinking about which data we should store. Each game has players, turns, a board, and a game state. This game state describes whether the game is active, tied, or one of the two players won. We can save all this data in an account. This means that each new game will have its own account. Add the following to the bottom of the `lib.rs` file:
+Let's begin by thinking about what data we should store. Each game has players, turns, a board, and a game state. This game state describes whether the game is active, tied, or one of the two players won. We can save all this data in an account. This means that each new game will have its own account. Add the following to the bottom of the `lib.rs` file:
 ```rust,ignore
 #[account]
 pub struct Game {
@@ -228,7 +228,7 @@ pub struct SetupGame<'info> {
 }
 ```
 
-There's one more thing to do to complete `SetupGame`. Every account is created with a fixed amount of space, so we have to this space to the instruction as well. This is what the comments next to the `Game` struct indicated.
+There's one more thing to do to complete `SetupGame`. Every account is created with a fixed amount of space, so we have to add this space to the instruction as well. This is what the comments next to the `Game` struct indicated.
 ```rust,ignore
 #[derive(Accounts)]
 pub struct SetupGame<'info> {
@@ -420,7 +420,7 @@ it('player one wins', async() => {
 
 and run `anchor test`.
 
-You can finish writing the test by yourself (or check out the [the reference implementation](https://github.com/project-serum/anchor-book/tree/master/programs/tic-tac-toe)). Try to simulate a win and a tie!
+You can finish writing the test by yourself (or check out [the reference implementation](https://github.com/project-serum/anchor-book/tree/master/programs/tic-tac-toe)). Try to simulate a win and a tie!
 
 Proper testing also includes tests that try to exploit the contract. You can check whether you've protected yourself properly by calling `play` with unexpected parameters. You can also familiarize yourself with the returned `AnchorErrors` this way. For example:
 ```typescript

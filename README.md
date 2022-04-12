@@ -23,7 +23,7 @@ brew upgrade
 brew install mdbook
 ```
 
-Next, clone this repo and and serve the book:
+Next, clone this repo and serve the book:
 
 ```sh
 git clone https://github.com/project-serum/anchor-book.git
