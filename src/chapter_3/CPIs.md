@@ -138,13 +138,14 @@ We can verify that everything works as expected by replacing the contents of the
 ```ts
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
-import { Keypair, SystemProgram } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import { expect } from 'chai';
 import { Puppet } from '../target/types/puppet';
 import { PuppetMaster } from '../target/types/puppet_master';
 
 describe('puppet', () => {
-  anchor.setProvider(anchor.Provider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
   const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
@@ -156,7 +157,7 @@ describe('puppet', () => {
         .initialize()
         .accounts({
             puppet: puppetKeypair.publicKey,
-            user: anchor.getProvider().wallet.publicKey,
+            user: provider.wallet.publicKey,
         })
         .signers([puppetKeypair])
         .rpc();
@@ -267,13 +268,14 @@ Finally, change the test:
 ```ts
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
-import { Keypair, SystemProgram } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import { Puppet } from '../target/types/puppet';
 import { PuppetMaster } from '../target/types/puppet_master';
 import { expect } from 'chai';
 
 describe('puppet', () => {
-  anchor.setProvider(anchor.Provider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
   const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
@@ -286,7 +288,7 @@ describe('puppet', () => {
         .initialize(authorityKeypair.publicKey)
         .accounts({
             puppet: puppetKeypair.publicKey,
-            user: anchor.getProvider().wallet.publicKey,
+            user: provider.wallet.publicKey,
         })
         .signers([puppetKeypair])
         .rpc();

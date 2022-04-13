@@ -26,13 +26,14 @@ async function play(program: Program<TicTacToe>, game, player, tile, expectedTur
 
 describe('tic-tac-toe', () => {
   // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.Provider.env());
+  anchor.setProvider(anchor.AnchorProvider.env());
 
   const program = anchor.workspace.TicTacToe as Program<TicTacToe>;
+  const programProvider = program.provider as anchor.AnchorProvider;
 
   it('setup game!', async() => {
     const gameKeypair = anchor.web3.Keypair.generate();
-    const playerOne = program.provider.wallet;
+    const playerOne = programProvider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
     await program.methods
       .setupGame(playerTwo.publicKey)
@@ -56,7 +57,7 @@ describe('tic-tac-toe', () => {
 
   it('player one wins!', async () => {
     const gameKeypair = anchor.web3.Keypair.generate();
-    const playerOne = program.provider.wallet;
+    const playerOne = programProvider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
     await program.methods
       .setupGame(playerTwo.publicKey)
@@ -242,7 +243,7 @@ describe('tic-tac-toe', () => {
 
   it('tie', async () => {
     const gameKeypair = anchor.web3.Keypair.generate();
-    const playerOne = program.provider.wallet;
+    const playerOne = programProvider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
     await program.methods
       .setupGame(playerTwo.publicKey)
