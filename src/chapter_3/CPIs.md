@@ -349,7 +349,9 @@ Ok(())
 
 ## Returning values from handler functions
 
-The Anchor handler functions are capable of returning data using the Solana `set_return_data` and `get_return_data` syscalls. Instead of returning a `Result<()>`, consider this version of the `set_data` function from above which has been modified to return `Result<u64>`:
+The Anchor handler functions are capable of returning data using the Solana `set_return_data` and `get_return_data` syscalls. This data can be used in CPI callers and clients.
+
+Instead of returning a `Result<()>`, consider this version of the `set_data` function from above which has been modified to return `Result<u64>`:
 
 ```rust,ignore
 pub fn set_data(ctx: Context<SetData>, data: u64) -> Result<u64> {
