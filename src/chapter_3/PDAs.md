@@ -201,8 +201,8 @@ anchor.setProvider(anchor.Provider.env());
     await program.methods
       .createUserStats("brian")
       .accounts({
-          user: anchor.getProvider().wallet.publicKey,
-          userStats: userStatsPDA,
+        user: anchor.getProvider().wallet.publicKey,
+        userStats: userStatsPDA,
       })
       .rpc();
 
