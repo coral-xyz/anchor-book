@@ -2,7 +2,6 @@ use crate::errors::TicTacToeError;
 use anchor_lang::prelude::*;
 use num_derive::*;
 use num_traits::*;
-use std::mem;
 
 #[account]
 pub struct Game {

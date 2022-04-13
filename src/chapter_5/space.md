@@ -18,7 +18,7 @@ In addition to the space for the account data, you have to add `8` to the `space
 | Pubkey          | 32                                |
 | Vec\<T>         | 4 + (space(T) * amount)           | Account size is fixed so account should be initialized with sufficient space from the beginning
 | String          | 4 + length of string in bytes     | Account size is fixed so account should be initialized with sufficient space from the beginning
-| Option<T>       | 1 + (space(T))                    | 
+| Option\<T>      | 1 + (space(T))                    | 
 | Enum            | 1 + Largest Variant Size          | e.g. Enum { A, B { val: u8 }, C { val: u16 } } -> 1 + space(u16) = 3
 | f32             | 4                                 | serialization will fail for NaN
 | f64             | 8                                 | serialization will fail for NaN

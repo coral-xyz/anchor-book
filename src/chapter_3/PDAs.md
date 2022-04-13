@@ -178,13 +178,13 @@ Finally, let's add a test. Copy this into `game.ts`
 ```ts
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
-import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { Game } from '../target/types/game';
 import { expect } from 'chai';
 
 describe('game', async() => {
-
-anchor.setProvider(anchor.Provider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const program = anchor.workspace.Game as Program<Game>;
 
@@ -193,27 +193,28 @@ anchor.setProvider(anchor.Provider.env());
       .findProgramAddress(
         [
           anchor.utils.bytes.utf8.encode("user-stats"),
-          anchor.getProvider().wallet.publicKey.toBuffer()
+          provider.wallet.publicKey.toBuffer()
         ],
         program.programId
       );
 
-    await program.rpc.createUserStats("brian", {
-      accounts: {
-        user: anchor.getProvider().wallet.publicKey,
+    await program.methods
+      .createUserStats("brian")
+      .accounts({
+        user: provider.wallet.publicKey,
         userStats: userStatsPDA,
-        systemProgram: SystemProgram.programId
-      }
-    });
+      })
+      .rpc();
 
     expect((await program.account.userStats.fetch(userStatsPDA)).name).to.equal("brian");
 
-    await program.rpc.changeUserName("tom", {
-      accounts: {
-        user: anchor.getProvider().wallet.publicKey,
+    await program.methods
+      .changeUserName("tom")
+      .accounts({
+        user: provider.wallet.publicKey,
         userStats: userStatsPDA
-      }
-    })
+      })
+      .rpc();
 
     expect((await program.account.userStats.fetch(userStatsPDA)).name).to.equal("tom");
   });
@@ -288,13 +289,14 @@ Finally, this is the new `puppet.ts`:
 ```ts
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
-import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { Puppet } from '../target/types/puppet';
 import { PuppetMaster } from '../target/types/puppet_master';
 import { expect } from 'chai';
 
 describe('puppet', () => {
-  anchor.setProvider(anchor.Provider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
   const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
@@ -305,22 +307,23 @@ describe('puppet', () => {
     const [puppetMasterPDA, puppetMasterBump] = await PublicKey
       .findProgramAddress([], puppetMasterProgram.programId);
 
-    await puppetProgram.rpc.initialize(puppetMasterPDA, {
-      accounts: {
+    await puppetProgram.methods
+      .initialize(puppetMasterPDA)
+      .accounts({
         puppet: puppetKeypair.publicKey,
-        user: anchor.getProvider().wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [puppetKeypair]
-    });
+        user: provider.wallet.publicKey,
+      })
+      .signers([puppetKeypair])
+      .rpc();
 
-    await puppetMasterProgram.rpc.pullStrings(puppetMasterBump, new anchor.BN(42),{
-      accounts: {
+    await puppetMasterProgram.methods
+      .pullStrings(puppetMasterBump, new anchor.BN(42))
+      .accounts({
         puppetProgram: puppetProgram.programId,
         puppet: puppetKeypair.publicKey,
         authority: puppetMasterPDA
-      ,
-    }});
+      })
+      .rpc();
 
     expect((await puppetProgram.account.data
       .fetch(puppetKeypair.publicKey)).data.toNumber()).to.equal(42);
@@ -328,7 +331,7 @@ describe('puppet', () => {
 });
 ```
 
-The `authority` is no longer a randomly generated keypair but a PDA derived from the puppet-master program. This means the puppet-master can sign with it which it does inside `pullStrings`. It's worth noting that our implementation also allows non-canonical bumps but again because we are only interesting in being able to sign we don't care which bump is used.
+The `authority` is no longer a randomly generated keypair but a PDA derived from the puppet-master program. This means the puppet-master can sign with it which it does inside `pullStrings`. It's worth noting that our implementation also allows non-canonical bumps but again because we are only interested in being able to sign we don't care which bump is used.
 
 > In some cases it's possible to reduce the number of accounts you need by making a PDA storing state also sign a CPI instead of defining a separate PDA to do that.
 

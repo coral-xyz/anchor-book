@@ -7,7 +7,7 @@ You're now ready to build your first anchor project. Create a new anchor workspa
 anchor init tic-tac-toe
 ```
 
-The program will have 2 instructions. First, we need to setup the game. We need to save who is playing it and create a board to play on. Then, the player take turns until there is a winner or a tie.
+The program will have 2 instructions. First, we need to setup the game. We need to save who is playing it and create a board to play on. Then, the players take turns until there is a winner or a tie.
 
 We recommend keeping programs in a single `lib.rs` file until they get too big. We would not split up this project into multiple files either but there is a section at the end of this chapter that explains how to do it for this and other programs.
 
@@ -15,7 +15,7 @@ We recommend keeping programs in a single `lib.rs` file until they get too big. 
 
 ### State
 
-Let's begin by thinking about which data we should store. Each game has players, turns, a board, and a game state. This game state describes whether the game is active, tied, or one of the two players won. We can save all this data in an account. This means that each new game will have its own account. Add the following to the bottom of the `lib.rs` file:
+Let's begin by thinking about what data we should store. Each game has players, turns, a board, and a game state. This game state describes whether the game is active, tied, or one of the two players won. We can save all this data in an account. This means that each new game will have its own account. Add the following to the bottom of the `lib.rs` file:
 ```rust,ignore
 #[account]
 pub struct Game {
@@ -228,7 +228,7 @@ pub struct SetupGame<'info> {
 }
 ```
 
-There's one more thing to do to complete `SetupGame`. Every account is created with a fixed amount of space, so we have to this space to the instruction as well. This is what the comments next to the `Game` struct indicated.
+There's one more thing to do to complete `SetupGame`. Every account is created with a fixed amount of space, so we have to add this space to the instruction as well. This is what the comments next to the `Game` struct indicated.
 ```rust,ignore
 #[derive(Accounts)]
 pub struct SetupGame<'info> {
@@ -280,14 +280,14 @@ Time to test our code! Head over into the `tests` folder in the root directory. 
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = program.provider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
-    await program.rpc.setupGame(playerTwo.publicKey, {
-      accounts: {
+    await program.methods
+      .setupGame(playerTwo.publicKey)
+      .accounts({
         game: gameKeypair.publicKey,
         playerOne: playerOne.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId
-      },
-      signers: [gameKeypair]
-    });
+      })
+      .signers([gameKeypair])
+      .rpc();
 
     let gameState = await program.account.game.fetch(gameKeypair.publicKey);
     expect(gameState.turn).to.equal(1);
@@ -310,14 +310,15 @@ import { expect } from 'chai';
 > This is likely because the test file is looking for types from your program that haven't been generated yet.
 > To generate them, run `anchor build`. This builds the program and creates the idl and typescript types.
 
-The test begins by creating some keypairs. Importantly, `playerOne` is not a keypair but the wallet of the program's provider. The provider details are defined in the `Anchor.toml` file in the root of the project.
-Then, we send the transaction. Because the anchor typescript client has parsed the IDL, all transaction inputs have types. If you remove one of the accounts for example, typescript will complain. 
+The test begins by creating some keypairs. Importantly, `playerOne` is not a keypair but the wallet of the program's provider. The provider details are defined in the `Anchor.toml` file in the root of the project. The provider serves as the keypair that pays for (and therefore signs) all transactions.
+Then, we send the transaction.
 The structure of the transaction function is as follows: First come the instruction arguments. For this function, the public key of the second player. Then come the accounts. Lastly, we add a signers array. We have to add the `gameKeypair` here because whenever an account gets created, it has to sign its creation transaction. We don't have to add `playerOne` even though we gave it the `Signer` type in the program because it is the program provider and therefore signs the transaction by default.
+We did not have to specify the `system_program` account. This is because anchor recognizes this account and is able to infer it. This is also true for other known accounts such as the `token_program` or the `rent` sysvar account.
 
 After the transaction returns, we can fetch the state of the game account. You can fetch account state using the `program.account` namespace. 
 Finally, we verify the game has been set up properly. Anchor's typescript client deserializes rust enums like this: `{ active: {}}` for a fieldless variant and `{ won: { winner: Pubkey }}` for a variant with fields. The `None` variant of `Option` becomes `null`. The `Some(x)` variant becomes whatever `x` deserializes to.
 
-Now, run `anchor test`. This starts up (and subsequently shuts down) a local validator (make sure you don't have one running) and runs your tests using the test script defined in `Anchor.toml`.
+Now, run `anchor test`. This starts up (and subsequently shuts down) a local validator (make sure you don't have one running before) and runs your tests using the test script defined in `Anchor.toml`.
 
 > If you get the error `Error: Unable to read keypair file` when running the test, you likely need to generate a Solana keypair using `solana-keygen new`.
 
@@ -358,15 +359,16 @@ We've checked in the accounts struct that the `player` account has signed the tr
 
 Testing the `play` instruction works the exact same way. To avoid repeating yourself, create a helper function at the top of the test file:
 ```typescript
-async function play(program, game, player,
+async function play(program: Program<TicTacToe>, game, player,
     tile, expectedTurn, expectedGameState, expectedBoard) {
-  await program.rpc.play(tile, {
-    accounts: {
+  await program.methods
+    .play(tile)
+    .accounts({
       player: player.publicKey,
       game
-    },
-    signers: player instanceof (anchor.Wallet as any) ? [] : [player]
-  });
+    })
+    .signers(player instanceof (anchor.Wallet as any) ? [] : [player])
+    .rpc();
 
   const gameState = await program.account.game.fetch(game);
   expect(gameState.turn).to.equal(expectedTurn);
@@ -383,14 +385,14 @@ it('player one wins', async() => {
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = program.provider.wallet;
     const playerTwo = anchor.web3.Keypair.generate();
-    await program.rpc.setupGame(playerTwo.publicKey, {
-      accounts: {
+    await program.methods
+      .setupGame(playerTwo.publicKey)
+      .accounts({
         game: gameKeypair.publicKey,
         playerOne: playerOne.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId
-      },
-      signers: [gameKeypair]
-    });
+      })
+      .signers([gameKeypair])
+      .rpc();
 
     let gameState = await program.account.game.fetch(gameKeypair.publicKey);
     expect(gameState.turn).to.equal(1);
@@ -420,7 +422,7 @@ it('player one wins', async() => {
 
 and run `anchor test`.
 
-You can finish writing the test by yourself (or check out the [the reference implementation](https://github.com/project-serum/anchor-book/tree/master/programs/tic-tac-toe)). Try to simulate a win and a tie!
+You can finish writing the test by yourself (or check out [the reference implementation](https://github.com/project-serum/anchor-book/tree/master/programs/tic-tac-toe)). Try to simulate a win and a tie!
 
 Proper testing also includes tests that try to exploit the contract. You can check whether you've protected yourself properly by calling `play` with unexpected parameters. You can also familiarize yourself with the returned `AnchorErrors` this way. For example:
 ```typescript
