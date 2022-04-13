@@ -178,13 +178,13 @@ Finally, let's add a test. Copy this into `game.ts`
 ```ts
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
-import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { Game } from '../target/types/game';
 import { expect } from 'chai';
 
 describe('game', async() => {
-
-anchor.setProvider(anchor.Provider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const program = anchor.workspace.Game as Program<Game>;
 
@@ -193,7 +193,7 @@ anchor.setProvider(anchor.Provider.env());
       .findProgramAddress(
         [
           anchor.utils.bytes.utf8.encode("user-stats"),
-          anchor.getProvider().wallet.publicKey.toBuffer()
+          provider.wallet.publicKey.toBuffer()
         ],
         program.programId
       );
@@ -201,7 +201,7 @@ anchor.setProvider(anchor.Provider.env());
     await program.methods
       .createUserStats("brian")
       .accounts({
-        user: anchor.getProvider().wallet.publicKey,
+        user: provider.wallet.publicKey,
         userStats: userStatsPDA,
       })
       .rpc();
@@ -211,7 +211,7 @@ anchor.setProvider(anchor.Provider.env());
     await program.methods
       .changeUserName("tom")
       .accounts({
-        user: anchor.getProvider().wallet.publicKey,
+        user: provider.wallet.publicKey,
         userStats: userStatsPDA
       })
       .rpc();
@@ -289,13 +289,14 @@ Finally, this is the new `puppet.ts`:
 ```ts
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
-import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { Puppet } from '../target/types/puppet';
 import { PuppetMaster } from '../target/types/puppet_master';
 import { expect } from 'chai';
 
 describe('puppet', () => {
-  anchor.setProvider(anchor.Provider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
   const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
@@ -310,7 +311,7 @@ describe('puppet', () => {
       .initialize(puppetMasterPDA)
       .accounts({
         puppet: puppetKeypair.publicKey,
-        user: anchor.getProvider().wallet.publicKey,
+        user: provider.wallet.publicKey,
       })
       .signers([puppetKeypair])
       .rpc();
