@@ -198,22 +198,23 @@ anchor.setProvider(anchor.Provider.env());
         program.programId
       );
 
-    await program.rpc.createUserStats("brian", {
-      accounts: {
+    await program.methods
+      .createUserStats("brian")
+      .accounts({
         user: anchor.getProvider().wallet.publicKey,
         userStats: userStatsPDA,
-        systemProgram: SystemProgram.programId
-      }
-    });
+      })
+      .rpc();
 
     expect((await program.account.userStats.fetch(userStatsPDA)).name).to.equal("brian");
 
-    await program.rpc.changeUserName("tom", {
-      accounts: {
+    await program.methods
+      .changeUserName("tom")
+      .accounts({
         user: anchor.getProvider().wallet.publicKey,
         userStats: userStatsPDA
-      }
-    })
+      })
+      .rpc();
 
     expect((await program.account.userStats.fetch(userStatsPDA)).name).to.equal("tom");
   });
@@ -304,23 +305,23 @@ describe('puppet', () => {
   it('Does CPI!', async () => {
     const [puppetMasterPDA, puppetMasterBump] = await PublicKey
       .findProgramAddress([], puppetMasterProgram.programId);
-
-    await puppetProgram.rpc.initialize(puppetMasterPDA, {
-      accounts: {
+    await puppetProgram.methods
+      .initialize(puppetMasterPDA)
+      .accounts({
         puppet: puppetKeypair.publicKey,
         user: anchor.getProvider().wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [puppetKeypair]
-    });
+      })
+      .signers([puppetKeypair])
+      .rpc();
 
-    await puppetMasterProgram.rpc.pullStrings(puppetMasterBump, new anchor.BN(42),{
-      accounts: {
+    await puppetMasterProgram.methods
+      .pullStrings(puppetMasterBump, new anchor.BN(42))
+      .accounts({
         puppetProgram: puppetProgram.programId,
         puppet: puppetKeypair.publicKey,
         authority: puppetMasterPDA
-      ,
-    }});
+      })
+      .rpc();
 
     expect((await puppetProgram.account.data
       .fetch(puppetKeypair.publicKey)).data.toNumber()).to.equal(42);
