@@ -285,6 +285,16 @@ impl<'info> PullStrings<'info> {
 
 The `authority` account is now an `UncheckedAccount` instead of a `Signer`. When the puppet-master is invoked, the `authority` pda is not a signer yet so we mustn't add a check for it. We just care about the puppet-master being able to sign so we don't add any additional seeds. Just a bump that is calculated off-chain and then passed to the function.
 
+Then, adjust the puppet code. This is a simple change, we just want to remove the `has_one` constraint on the puppet account. The [`has_one` constraint](https://docs.rs/anchor-lang/latest/anchor_lang/derive.Accounts.html) checks if `puppet.owner == authority.key()`, which is no longer satisfied since we're passing a PDA as the authority.
+```rust,ignore
+#[derive(Accounts)]
+pub struct SetData<'info> {
+    #[account(mut)]
+    pub puppet: Account<'info, Data>,
+    pub authority: Signer<'info>
+}
+```
+
 Finally, this is the new `puppet.ts`:
 ```ts
 import * as anchor from '@project-serum/anchor';
