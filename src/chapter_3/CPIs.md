@@ -152,21 +152,22 @@ describe('puppet', () => {
   const puppetKeypair = Keypair.generate();
 
   it('Does CPI!', async () => {
-    await puppetProgram.rpc.initialize({
-      accounts: {
-        puppet: puppetKeypair.publicKey,
-        user: anchor.getProvider().wallet.publicKey,
-        systemProgram: SystemProgram.programId
-      },
-      signers: [puppetKeypair]
-    });
+    await puppetProgram.methods
+        .initialize()
+        .accounts({
+            puppet: puppetKeypair.publicKey,
+            user: anchor.getProvider().wallet.publicKey,
+        })
+        .signers([puppetKeypair])
+        .rpc();
 
-    await puppetMasterProgram.rpc.pullStrings(new anchor.BN(42),{
-      accounts: {
-        puppetProgram: puppetProgram.programId,
-        puppet: puppetKeypair.publicKey
-      }
-    })
+    await puppetMasterProgram.methods
+        .pullStrings(new anchor.BN(42))
+        .accounts({
+            puppetProgram: puppetProgram.programId,
+            puppet: puppetKeypair.publicKey
+        })
+        .rpc();
 
     expect((await puppetProgram.account.data
       .fetch(puppetKeypair.publicKey)).data.toNumber()).to.equal(42);
@@ -281,23 +282,24 @@ describe('puppet', () => {
   const authorityKeypair = Keypair.generate();
 
   it('Does CPI!', async () => {
-    await puppetProgram.rpc.initialize(authorityKeypair.publicKey, {
-      accounts: {
-        puppet: puppetKeypair.publicKey,
-        user: anchor.getProvider().wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [puppetKeypair]
-    });
+    await puppetProgram.methods
+        .initialize(authorityKeypair.publicKey)
+        .accounts({
+            puppet: puppetKeypair.publicKey,
+            user: anchor.getProvider().wallet.publicKey,
+        })
+        .signers([puppetKeypair])
+        .rpc();
 
-    await puppetMasterProgram.rpc.pullStrings(new anchor.BN(42),{
-      accounts: {
-        puppetProgram: puppetProgram.programId,
-        puppet: puppetKeypair.publicKey,
-        authority: authorityKeypair.publicKey
-      },
-      signers: [authorityKeypair]
-    })
+    await puppetMasterProgram.methods
+        .pullStrings(new anchor.BN(42))
+        .accounts({
+            puppetProgram: puppetProgram.programId,
+            puppet: puppetKeypair.publicKey,
+            authority: authorityKeypair.publicKey
+        })
+        .signers([authorityKeypair])
+        .rpc();
 
     expect((await puppetProgram.account.data
       .fetch(puppetKeypair.publicKey)).data.toNumber()).to.equal(42);
