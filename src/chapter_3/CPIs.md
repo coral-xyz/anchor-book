@@ -347,11 +347,68 @@ if ctx.accounts.puppet.data != 42 {
 Ok(())
 ```
 
-## Returning values from a CPI
+## Returning values from handler functions
 
-Since 1.8.12, the `set_return_data` and `get_return_data` syscalls can be used to set and get return data from CPIs. While these can already be used in anchor programs, anchor does not yet provide abstractions on top of them.
+The Anchor handler functions are capable of returning data using the Solana `set_return_data` and `get_return_data` syscalls. This data can be used in CPI callers and clients.
 
-The return data can only be max 1024 bytes with these syscalls so it's worth briefly explaining the old workaround for CPI return values which is still relevant for return values bigger than 1024 bytes.
+Instead of returning a `Result<()>`, consider this version of the `set_data` function from above which has been modified to return `Result<u64>`:
+
+```rust,ignore
+pub fn set_data(ctx: Context<SetData>, data: u64) -> Result<u64> {
+    let puppet = &mut ctx.accounts.puppet;
+    puppet.data = data;
+    Ok(data)
+}
+```
+
+Defining a return type that isn't the unit type `()` will cause Anchor to transparently call `set_return_data` with the given type (`u64` in this example) when this function is called. The return from the CPI call is wrapped in a struct to allow for lazy retrieval of this return data. E.g.
+
+```rust,ignore
+pub fn pull_strings(ctx: Context<PullStrings>, data: u64) -> Result<()> {
+    let cpi_program = ctx.accounts.puppet_program.to_account_info();
+    let cpi_accounts = SetData {
+        puppet: ctx.accounts.puppet.to_account_info(),
+    };
+    let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+    let result = puppet::cpi::set_data(cpi_ctx, data)?;
+    // The below statement calls sol_get_return and deserializes the result.
+    // `return_data` contains the return from `set_data`,
+    // which in this example is just `data`.
+    let return_data = result.get();
+    // ... do something with the `return_data` ...
+}
+```
+
+Note that the type being returned must implement the `AnchorSerialize` and `AnchorDeserialize` traits, for example:
+
+```rust,ignore
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct StructReturn {
+    pub value: u64,
+}
+```
+
+### Reading return data in the clients
+
+It's even possible to use return values without CPIs. This may be useful if you're using a function to calculate a value that you need on the frontend without rewriting the code in the frontend.
+
+Whether you're using a CPI or not, you can use the `view` function to read whatever was set last as return data in the transaction (`view` simulates the transaction and reads the `Program return` log).
+
+For example:
+
+```typescript,ignore
+const returnData = await program.methods
+    .calculate(someVariable)
+    .accounts({
+        acc: somePubkey,
+        anotherAcc: someOtherPubkey
+    })
+    .view();
+```
+
+### Return Data Size Limit Workarounds
+
+The `set_return_data` and `get_return_data` syscalls are limited to 1024 bytes so it's worth briefly explaining the old workaround for CPI return values.
 
 By using a CPI together with `reload` it's possible to simulate return values. One could imagine that instead of just setting the `data` field to `42` the puppet program did some calculation with the `42` and saved the result in `data`. The puppet-master can then call `reload` after the cpi and use the result of the puppet program's calculation.
 
