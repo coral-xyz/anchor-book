@@ -47,7 +47,7 @@ Because validators don’t have infinite storage and providing storage costs mon
 
 Let’s now look at an example of a program: The System Program. The System Program is a smart contract with some additional privileges.
 
-All “normal” SOL accounts are owned by the System Program. One of the system program’s responsibilities is handling transfers between the accounts it owns. This is worth repeating: Even normal SOL transfers on Solana are handled by a smart contract.
+All "normal" SOL accounts are owned by the System Program. One of the system program’s responsibilities is handling transfers between the accounts it owns. This is worth repeating: Even normal SOL transfers on Solana are handled by a smart contract.
 
 To provide transfer functionality, the system program has a “transfer” endpoint. This endpoint takes 2 accounts - from and to - and a “lamports” argument. The system program checks whether `from` signed the transaction via the `is_signer` field on the `from` account. The runtime will set this flag to `true` if the private key of the keypair that the account’s public key belongs to signed the transaction. If “from” signed the transaction, the system program removes lamports from `from`’s account and adds them to `to`’s account.
 
