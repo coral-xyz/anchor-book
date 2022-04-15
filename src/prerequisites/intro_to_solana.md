@@ -153,6 +153,46 @@ fn transfer(accounts, lamports) {
 
 If it didn't do that, anyone could call the endpoint with your account and make the system program transfer the lamports from your account into theirs.
 
-There are many types of attacks possible on Solana that all revolve around passing in one account where another was expected but it wasn't checked that the actual one is really the expected one. This brings us from Solana to Anchor. A big part of Anchor's raison d'être is making input validation easier or even doing it for you when possible. 
+The book will eventually have a chapter explaining all the different types of attacks and how anchor prevents them but for now here's one more example. Consider the counter program from earlier. Now imagine that next to the counter struct, there's another struct that is a singleton which is used to count how many counters there are.
+
+```rust,ignore
+struct CounterCounter {
+    count: u64
+}
+```
+
+Every time a new counter is created, the `count` variable of the counter counter should be incremented by one.
+
+Consider the following `increment` instruction that increases the value of a counter account:
+
+```ignore
+/// pseudo code
+fn increment(accounts) {
+    let counter = deserialize(accounts.counter);
+    counter.count += 1;
+}
+```
+
+This function is insecure. But why? It's not possible to pass in an account owned by a different program because the function writes to the account so the runtime would make the transaction fail. But it is possible to pass in the counter counter singleton account because both the counter and the counter counter struct have the same structure (they're a rust struct with a single `u64` variable). This would then increase the counter counter's count and it would no longer track how many counters there are.
+
+The fix is simple:
+
+```ignore
+/// pseudo code
+
+// a better approach than hardcoding the address is using a PDA.
+// We will cover those later in the book.
+let HARDCODED_COUNTER_COUNTER_ADDRESS = SOME_ADDRESS;
+
+fn increment(accounts) {
+    if accounts.counter.key == HARDCODED_COUNTER_COUNTER_ADDRESS {
+        error("Wrong account type");
+    }
+    let counter = deserialize(accounts.counter);
+    counter.count += 1;
+}
+```
+
+There are many types of attacks possible on Solana that all revolve around passing in one account where another was expected but it wasn't checked that the actual one is really the expected one. This brings us from Solana to Anchor. A big part of Anchor's raison d'être is making input validation easier or even doing it for you when possible (e.g. with idiomatic anchor, this account type confusion cannot happen thanks to anchor's discriminator which we'll cover later in the book).
 
 Let's dive in.
