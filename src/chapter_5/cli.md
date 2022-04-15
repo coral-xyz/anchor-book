@@ -28,6 +28,7 @@ SUBCOMMANDS:
     verify     Verifies the on-chain bytecode matches the locally compiled artifact. Run this
                command inside a program subdirectory, i.e., in the dir containing the program's
                Cargo.toml
+    shell      Starts a node shell with an Anchor client setup according to the local config
 ```
 
 
@@ -242,3 +243,11 @@ anchor verify <program-id>
 ```
 
 Verifies the on-chain bytecode matches the locally compiled artifact.
+
+## Shell
+
+```
+anchor shell
+```
+
+Starts a node js shell with an Anchor client setup according to the local config. Client can be used to communicate with RPC to test the Solana program
