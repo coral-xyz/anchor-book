@@ -81,8 +81,7 @@ await program
     .init({ one: {} })
     .rpc();
 </code></pre>
-<pre><code>
-// Rust 
+<pre><code>// Rust 
 enum MyEnum { One: { val: u64 }, Two };
 // JS
 await program
