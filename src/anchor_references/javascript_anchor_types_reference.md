@@ -1,6 +1,6 @@
 # Javascript Anchor Types Reference
 
-This reference shows you how rust types are mapped to javascript/typescript types in the client.
+This reference shows you how anchor maps rust types to javascript/typescript types in the client.
 
 <table>
 <thead>
