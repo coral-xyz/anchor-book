@@ -16,7 +16,10 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>bool</td>
         <td>bool</td>
         <td >
-            <code>await program.methods.init(true).rpc();</code>
+            <pre><code>await program
+    .methods
+    .init(true)
+    .rpc();</code></pre>
         </td>
         <td></td>
     </tr>
@@ -24,7 +27,10 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>u64/u128/i64/i128</td>
         <td>anchor.BN</td>
         <td >
-            <code>await program.methods.init(new anchor.BN(99)).rpc();</code>
+            <pre><code>await program
+    .methods
+    .init(new anchor.BN(99))
+    .rpc();</code></pre>
         </td>
         <td>
             https://github.com/indutny/bn.js/
@@ -34,7 +40,10 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>u8/u16/u32/i8/i16/i32</td>
         <td>number</td>
         <td >
-            <code>await program.methods.init(99).rpc();</code>
+            <pre><code>await program
+    .methods
+    .init(99)
+    .rpc();</code></pre>
         </td>
         <td></td>
     </tr>
@@ -42,7 +51,10 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>f32/f64</td>
         <td>number</td>
         <td >
-            <code>await program.methods.init(1.0).rpc();</code>
+            <pre><code>await program
+    .methods
+    .init(1.0)
+    .rpc();</code></pre>
         </td>
         <td></td>
     </tr>
@@ -50,7 +62,10 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>Option&lt;T&gt;</td>
         <td><code>null</code> or T</td>
         <td >
-            <code>await program.methods.init(null).rpc();</code>
+            <pre><code>await program
+    .methods
+    .init(null)
+    .rpc();</code></pre>
         </td>
         <td></td>
     </tr>
@@ -58,21 +73,23 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>Enum</td>
         <td nowrap><code>{ variantName: {} }</code></td>
         <td>
-            <code> // Rust</code>
-            </br>
-            <code>enum MyEnum { One, Two };</code>
-            </br>
-            <code> // JS</code>
-            </br>
-            <code>await program.methods.init({ one: {} }).rpc();</code>
-            </br></br>
-            <code> // Rust</code>
-            </br>
-            <code> enum MyEnum { One: { val: u64 }, Two };</code>
-            </br>
-            <code> // JS</code>
-            </br>
-            <code>await program.methods.init({ one: { val: 99 } }).rpc();</code>
+            <pre><code>// Rust
+enum MyEnum { One, Two };
+// JS
+await program
+    .methods
+    .init({ one: {} })
+    .rpc();
+</code></pre>
+<pre><code>
+// Rust 
+enum MyEnum { One: { val: u64 }, Two };
+// JS
+await program
+    .methods
+    .init({ one: { val: 99 } })
+    .rpc();
+</code></pre>
         </td>
         <td>
             No support for tuple variants
@@ -82,13 +99,14 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>Struct</td>
         <td nowrap><code>{ val: {} }</code></td>
         <td>
-            <code> // Rust</code>
-            </br>
-            <code>struct MyStruct { val: u64 };</code>
-            </br>
-            <code> // JS</code>
-            </br>
-            <code>await program.methods.init({ val: 99 }).rpc();</code>
+<pre><code>// Rust
+struct MyStruct { val: u64 };
+// JS
+await program
+    .methods
+    .init({ val: 99 })
+    .rpc();
+</code></pre>
         </td>
         <td>
             No support for tuple structs
@@ -98,7 +116,10 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>[T; N]</td>
         <td>[ T ]</td>
         <td >
-            <code>await program.methods.init([1,2,3]).rpc();</code>
+            <pre><code>await program
+    .methods
+    .init([1,2,3])
+    .rpc();</code></pre>
         </td>
         <td></td>
     </tr>
@@ -106,7 +127,10 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>String</td>
         <td>string</td>
         <td >
-            <code>await program.methods.init("hello").rpc();</code>
+            <pre><code>await program
+    .methods
+    .init("hello")
+    .rpc();</code></pre>
         </td>
         <td></td>
     </tr>
@@ -114,7 +138,10 @@ This reference shows you how rust types are mapped to javascript/typescript type
         <td>Vec&lt;T&gt;</td>
         <td>[ T ]</td>
         <td >
-            <code>await program.methods.init([1, 2, 3]).rpc();</code>
+            <pre><code>await program
+    .methods
+    .init([1,2,3])
+    .rpc();</code></pre>
         </td>
         <td></td>
     </tr>
