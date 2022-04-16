@@ -316,7 +316,7 @@ The structure of the transaction function is as follows: First come the instruct
 We did not have to specify the `system_program` account. This is because anchor recognizes this account and is able to infer it. This is also true for other known accounts such as the `token_program` or the `rent` sysvar account.
 
 After the transaction returns, we can fetch the state of the game account. You can fetch account state using the `program.account` namespace. 
-Finally, we verify the game has been set up properly by comparing the actual state and the expected state. To learn how Anchor maps the Rust types to the js/ts types, check out the [Javascript Type Conversion Reference](./../anchor_references/js_type_conversion_reference.md).
+Finally, we verify the game has been set up properly by comparing the actual state and the expected state. To learn how Anchor maps the Rust types to the js/ts types, check out the [Javascript Anchor Types Reference](./../anchor_references/js_type_conversion_reference.md).
 
 Now, run `anchor test`. This starts up (and subsequently shuts down) a local validator (make sure you don't have one running before) and runs your tests using the test script defined in `Anchor.toml`.
 

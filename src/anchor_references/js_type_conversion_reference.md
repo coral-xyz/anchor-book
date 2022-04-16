@@ -1,4 +1,4 @@
-# Javascript Type Conversion Reference
+# Javascript Anchor Types Reference
 
 This reference shows you how rust types are mapped to javascript/typescript types in the client.
 
