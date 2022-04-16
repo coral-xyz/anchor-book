@@ -19,7 +19,7 @@ All state lives in this heap. Your SOL accounts, smart contracts, and memory use
 
 Since all state lives in the heap, even programs themselves live there. Accounts that store programs are owned by the `BPFLoader`. This is a program that can be used to deploy and upgrade other programs. The `BPFLoader` is owned by the `Native Loader` and that is where the recursion ends.
 
-## Transaction and Accounts
+## Transactions and Accounts
 
 You can make a program read and write data by sending transactions. Programs provide endpoints that can be called via transactions (In reality it's a bit more complex than that but frameworks like Anchor abstract away this complexity). A function signature usually takes the following arguments:
 - the accounts that the program may read from and write to during this transaction.
