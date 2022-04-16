@@ -33,7 +33,7 @@
 
 - [Anchor References](./anchor_references/anchor_references.md)
   - [Space Reference](./anchor_references/space.md)
-  - [Javascript Anchor Types Reference](./anchor_references/js_type_conversion_reference.md)
+  - [Javascript Anchor Types Reference](./anchor_references/javascript_anchor_types_reference.md)
   - [CLI Reference](./anchor_references/cli.md)
   - [AVM Reference](./anchor_references/avm.md)
   - [Anchor.toml Reference](./anchor_references/anchor-toml_reference.md)
