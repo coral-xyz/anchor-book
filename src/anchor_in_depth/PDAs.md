@@ -335,6 +335,279 @@ The `authority` is no longer a randomly generated keypair but a PDA derived from
 
 > In some cases it's possible to reduce the number of accounts you need by making a PDA storing state also sign a CPI instead of defining a separate PDA to do that.
 
+### PDA for both storing and signing
+
+In previous examples, we looked at how PDA could be used as state accounts and also how PDA could be used to sign CPI calls.
+
+> By utilizing the same PDA for both storing state and also signing CPI call, its possible to reduce to number of accounts needed.
+
+Consider a Token Distributor program, which mints tokens and also store state ( eg: supply amount, distributor name..etc).
+
+It has 2 instructions 
+1. `initialize_distributore` instruction, which initializes the state account and token mint.
+2. `get_token` instruction, which distributes or mints token to given user token account.
+
+Program code `lib.rs`
+```rust,ignore
+use anchor_lang::prelude::*;
+use anchor_spl::token::{ self, Mint, MintTo, Token, TokenAccount};
+
+
+declare_id!("ASTi2qK1PbondXrJxSjzmhLSvycW2Wo35Xf3YJRs1Hqe");
+
+#[program]
+pub mod token_distributor {
+
+    use super::*;
+
+    pub fn initialize_distributor(
+        ctx: Context<InitializeDistributor>,
+        distributor_name: String,
+        bumps: DistributorBumps,
+
+    ) -> Result<()> {
+        let distributor_account = &mut ctx.accounts.distributor_account;
+
+        distributor_account.is_initialized = true;
+        distributor_account.distributor_name = distributor_name;
+        distributor_account.bumps=bumps;
+        distributor_account.token_mint = *ctx.accounts.token_mint.to_account_info().key;
+        distributor_account.creator_authority = *ctx.accounts.distributor_creator.key;
+        distributor_account.token_supply = 0;
+        
+        Ok(())
+    }
+
+    pub fn get_token(
+        ctx: Context<GetToken>,
+        amount: u64,
+    ) -> Result<()> {
+
+        let distributor_name = &ctx.accounts.distributor_account.distributor_name;
+         // Mint Token to user 
+         let seeds = &[
+             distributor_name.as_bytes(),
+            &[ctx.accounts.distributor_account.bumps.distributor_account],
+        ];
+        let signer = &[&seeds[..]];
+        let cpi_accounts = MintTo {
+            mint: ctx.accounts.token_mint.to_account_info(),
+            to: ctx.accounts.user_token_account.to_account_info(),
+            authority: ctx.accounts.distributor_account.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program.clone(), cpi_accounts, signer);
+        token::mint_to(cpi_ctx, amount)?;
+        let distributor_account = &mut ctx.accounts.distributor_account;
+        distributor_account.token_supply += amount;
+
+        Ok(())
+    }
+}   
+
+#[derive(Accounts)]
+#[instruction( distributor_name: String, bumps: DistributorBumps)]
+pub struct InitializeDistributor<'info> {
+    #[account(mut)]
+    pub distributor_creator: Signer<'info>,
+
+    #[account(init,
+        seeds = [distributor_name.as_bytes()],
+        bump,
+        payer = distributor_creator,
+        space = 8 + 1 + 2 + 20 + 32 + 32 + 8)
+        ]
+    pub distributor_account: Box<Account<'info, DistributorAccount>>,
+
+    #[account(init,
+        mint::decimals = 0,
+        mint::authority = distributor_account,
+        seeds = [distributor_name.as_bytes(), b"token_mint"],
+        bump,
+        payer = distributor_creator)]
+    pub token_mint: Account<'info, Mint>,
+
+    // Prorgrams required for creating Account and Token Mint
+    pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub rent: Sysvar<'info, Rent>,
+}
+
+#[derive(Accounts)]
+pub struct GetToken<'info> {
+
+    #[account(
+        mut,
+        seeds = [distributor_account.distributor_name.as_bytes()],
+        bump = distributor_account.bumps.distributor_account,)
+        ]
+    pub distributor_account: Box<Account<'info, DistributorAccount>>,
+
+    #[account(
+        mut,
+        mint::decimals = 0,
+        mint::authority = distributor_account.key(),
+        seeds = [distributor_account.distributor_name.as_bytes(), b"token_mint"],
+        bump = distributor_account.bumps.token_mint,)]
+    pub token_mint: Account<'info, Mint>,
+
+    #[account(mut,
+        constraint = user_token_account.owner == *user.key
+    )]
+    pub user_token_account: Box<Account<'info, TokenAccount>>,
+    pub user: Signer<'info>,
+    pub token_program: Program<'info, Token>,
+}
+
+#[account]
+#[derive(Default)]
+pub struct DistributorAccount {
+    pub is_initialized: bool,
+    pub bumps: DistributorBumps,
+    pub distributor_name: String,
+    pub token_mint: Pubkey,
+    pub creator_authority: Pubkey,
+    pub token_supply: u64,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Default, Clone)]
+pub struct DistributorBumps {
+    pub distributor_account: u8,
+    pub token_mint: u8,
+}
+```
+Here account `distributor_account` is a PDA
+
+In instruction `initialize_distributor`, `distributor_account` is used for storing state and also used as mint authority 
+```rust, ignore
+#[account(init,
+    mint::decimals = 0,
+    mint::authority = distributor_account,
+    seeds = [distributor_name.as_bytes(), b"token_mint"],
+    bump,
+    payer = distributor_creator)]
+pub token_mint: Account<'info, Mint>,
+```
+In instruction `get_token`, seeds of `distributor_account` is passed along the CPI call to token program ( basically signing the instruction) for the mint instruction since the mint authority is the PDA `distributor_account`.
+```rust, ignore
+ let seeds = &[
+        distributor_name.as_bytes(),
+      &[ctx.accounts.distributor_account.bumps.distributor_account],
+  ];
+  /* 
+  ..
+  ..
+  */
+  let cpi_ctx = CpiContext::new_with_signer(cpi_program.clone(), cpi_accounts, signer);
+  token::mint_to(cpi_ctx, amount)?;
+```
+
+Typescript file for the program `test.ts`
+```ts
+import * as anchor from "@project-serum/anchor";
+import { Program } from "@project-serum/anchor";
+import { TokenDistributor } from "../target/types/token_distributor";
+import {
+  TOKEN_PROGRAM_ID,
+  getOrCreateAssociatedTokenAccount
+} from "@solana/spl-token";
+import { expect } from 'chai';
+
+describe("token_distributor", () => {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const programId = new anchor.web3.PublicKey('ASTi2qK1PbondXrJxSjzmhLSvycW2Wo35Xf3YJRs1Hqe');
+  const idl = JSON.parse(require('fs').readFileSync('./target/idl/token_distributor.json', 'utf8'));
+  const program = new anchor.Program(idl, programId) as Program<TokenDistributor>;
+  const distributorName = "Token Distro";
+
+  let distributorAccountPda: anchor.web3.PublicKey;
+  let tokenMint: anchor.web3.PublicKey;
+  let distributorAccountBump: number, tokenMintBump: number;
+
+  it("Initializes the Distributor", async () => {
+    let bumps = new DistributorBumps();
+
+    function DistributorBumps() {
+      this.distributorAccount;
+      this.tokenMint;
+    }
+
+    [distributorAccountPda, distributorAccountBump] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from(distributorName)],
+        program.programId
+      );
+    bumps.distributorAccount = distributorAccountBump;
+
+    [tokenMint, tokenMintBump] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from(distributorName), Buffer.from("token_mint")],
+        program.programId
+      );
+    bumps.tokenMint = tokenMintBump;
+
+    try {
+      //Check if Distributor Account is already initialized
+      await program.account.distributorAccount.fetch(distributorAccountPda);
+    }
+    catch (e) {
+      //Else Initialize Distributor
+      await program.methods
+        .initializeDistributor(distributorName, bumps)
+        .accounts({
+          distributorCreator: provider.wallet.publicKey,
+          distributorAccount: distributorAccountPda,
+          tokenMint: tokenMint,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        })
+        .rpc();
+    }
+
+    let distributorAccount = await program.account.distributorAccount.fetch(distributorAccountPda);
+    expect(distributorAccount.creatorAuthority.toString()).to.equal(provider.wallet.publicKey.toString());
+    expect(distributorAccount.isInitialized).to.equal(true);
+
+  });
+
+  it("Get Tokens from Distributor", async () => {
+    let amount = new anchor.BN(100)
+
+    // Find associated token account of User for the Mint, if not found, create it
+    // @ts-ignore
+    let userTokenAccount = await getOrCreateAssociatedTokenAccount(provider.connection, provider.wallet.payer, tokenMint, provider.wallet.publicKey);
+    let beforeAmountUser = Number(userTokenAccount.amount);
+    let distributorAccount = await program.account.distributorAccount.fetch(distributorAccountPda);
+    let beforeSupplyAmount = distributorAccount.tokenSupply;
+    // Distribute 100 tokens to User Token Account
+    await program.methods
+      .getToken(amount)
+      .accounts({
+        distributorAccount: distributorAccountPda,
+        tokenMint: tokenMint,
+        userTokenAccount: userTokenAccount.address,
+        user: provider.wallet.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    // @ts-ignore
+    userTokenAccount = await getOrCreateAssociatedTokenAccount(provider.connection, provider.wallet.payer, tokenMint, provider.wallet.publicKey);
+    let afterAmountUser = Number(userTokenAccount.amount);
+    distributorAccount = await program.account.distributorAccount.fetch(distributorAccountPda);
+    let afterSupplyAmount = distributorAccount.tokenSupply;
+
+    expect(beforeAmountUser + amount.toNumber()).to.equal(afterAmountUser);
+    expect(beforeSupplyAmount.add(amount).toNumber()).to.equal(afterSupplyAmount.toNumber());
+  });
+});
+```
+Complete example is available at [token_distributor](https://github.com/project-serum/anchor-book/tree/master/programs/token_distributor)
+
+
 ## PDAs: Conclusion
 
 This section serves as a brief recap of the different things you can do with PDAs.
