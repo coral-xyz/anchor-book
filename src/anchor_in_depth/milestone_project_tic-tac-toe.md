@@ -249,7 +249,7 @@ Let us briefly explain how we arrived at the `Game::MAXIMUM_SIZE`. Anchor uses t
 
 In addition to the game's size, we have to add another 8 to the space. This is space for the internal discriminator which anchor sets automatically. In short, the discriminator is how anchor can differentiate between different accounts of the same program. For more information, check out the Anchor space reference.
 
-> [Anchor Space Reference](./../chapter_5/space.md)
+> [Anchor Space Reference](./../anchor_references/space.md)
 
 > (What about using `mem::size_of<Game>()`? This almost works but not quite. The issue is that borsh will always serialize an option as 1 byte for the variant identifier and then additional x bytes for the content if it's Some. Rust uses null-pointer optimization to make Option's variant identifier 0 bytes when it can, so an option is sometimes just as big as its contents. This is the case with `Sign`. This means the `MAXIMUM_SIZE` could also be expressed as `mem::size_of<Game>() + 9`.)
 
