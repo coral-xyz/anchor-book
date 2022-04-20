@@ -151,7 +151,7 @@ Error:
         /anchor/tests/unchecked/programs/unchecked/src/lib.rs:15:8
         Struct field "potentially_dangerous" is unsafe, but is not documented.
         Please add a `/// CHECK:` doc comment explaining why no checks through types are necessary.
-        See https://book.anchor-lang.com/chapter_3/the_accounts_struct.html#safety-checks for more information.
+        See https://book.anchor-lang.com/anchor_in_depth/the_accounts_struct.html#safety-checks for more information.
 ```
 
 To fix this, write a doc comment describing the potential security implications, e.g.:
