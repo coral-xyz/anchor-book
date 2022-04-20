@@ -1,5 +1,5 @@
 # High-level Overview
-An Anchor program consists of three parts. The `program` module, the Accounts structs which are marked with `#[derive(Accounts)]`, and the `declareId` macro. The `program` module is where you write your business logic. The Accounts structs is where you validate accounts. The`declareId` macro creates an `ID` field that stores the address of your program.
+An Anchor program consists of three parts. The `program` module, the Accounts structs which are marked with `#[derive(Accounts)]`, and the `declare_id` macro. The `program` module is where you write your business logic. The Accounts structs is where you validate accounts. The`declare_id` macro creates an `ID` field that stores the address of your program. Anchor uses this hardcoded `ID` for security checks and it also allows other crates to access your program's address.
 
 When you start up a new Anchor project, you'll see the following:
 ```rust,ignore

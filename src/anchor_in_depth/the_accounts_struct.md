@@ -43,7 +43,7 @@ pub struct SetData<'info> {
 
 `Account` is generic over `T`. This `T` is a type you can create yourself to store data. In this example, we have created a struct `MyAccount` with a single `data` field to store a `u64`. Account requires `T` to implement certain functions (e.g. functions that (de)serialize `T`). Most of the time, you can use the `#[account]` attribute to add these functions to your data, as is done in the example.
 
-Most importantly, the `#[account]` attribute sets the owner of that data to the `ID` (the one we created earlier with `declareId`) of the crate `#[account]` is used in. The Account type can then check for you that the `AccountInfo` passed into your instruction has its `owner` field set to the correct program. In this example, `MyAccount` is declared in our own crate so `Account` will verify that the owner of `my_account` equals the address we declared with `declareId`.
+Most importantly, the `#[account]` attribute sets the owner of that data to the `ID` (the one we created earlier with `declare_id`) of the crate `#[account]` is used in. The Account type can then check for you that the `AccountInfo` passed into your instruction has its `owner` field set to the correct program. In this example, `MyAccount` is declared in our own crate so `Account` will verify that the owner of `my_account` equals the address we declared with `declare_id`.
 
 #### Using `Account<'a, T>` with non-anchor program accounts
 
