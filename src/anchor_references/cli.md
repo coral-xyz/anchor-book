@@ -212,20 +212,16 @@ of all workspace programs before running them.
 If the configured network is a localnet, then automatically starts the localnetwork and runs
 the test.
 
-::: tip Note
-Be sure to shutdown any other local validators, otherwise `anchor test` will fail to run.
-
-If you'd prefer to run the program against your local validator use `anchor test --skip-local-validator`.
-:::
+> Note: Be sure to shutdown any other local validators, otherwise `anchor test` will fail to run.
+> 
+> If you'd prefer to run the program against your local validator use `anchor test --skip-local-validator`.
 
 When running tests we stream program logs to `.anchor/program-logs/<address>.<program-name>.log`
 
-::: tip Note
-The Anchor workflow [recommends](https://www.parity.io/paritys-checklist-for-secure-smart-contract-development/)
-to test your program using integration tests in a language other
-than Rust to make sure that bugs related to syntax misunderstandings
-are coverable with tests and not just replicated in tests.
-:::
+> Note: The Anchor workflow [recommends](https://www.parity.io/paritys-checklist-for-secure-smart-contract-development/)
+> to test your program using integration tests in a language other
+> than Rust to make sure that bugs related to syntax misunderstandings
+> are coverable with tests and not just replicated in tests.
 
 ## Upgrade
 

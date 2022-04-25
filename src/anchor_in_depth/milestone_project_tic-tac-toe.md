@@ -278,7 +278,7 @@ Time to test our code! Head over into the `tests` folder in the root directory. 
 ```typescript
   it('setup game!', async() => {
     const gameKeypair = anchor.web3.Keypair.generate();
-    const playerOne = program.provider.wallet;
+    const playerOne = (program.provider as anchor.AnchorProvider).wallet;
     const playerTwo = anchor.web3.Keypair.generate();
     await program.methods
       .setupGame(playerTwo.publicKey)
