@@ -207,7 +207,7 @@ Creates a new program in the workspace's `programs/` directory initialized with 
 anchor shell
 ```
 
-Starts a node js shell with an Anchor client setup according to the local config. Client can be used to communicate with RPC to test the Solana program
+Starts a node js shell with an Anchor client setup according to the local config. This client can be used to interact with deployed Solana programs in the workspace.
 
 ## Test
 
