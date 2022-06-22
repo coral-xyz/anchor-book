@@ -1,8 +1,11 @@
 use crate::errors::TicTacToeError;
 use anchor_lang::prelude::*;
+// ANCHOR: use
 use num_derive::*;
 use num_traits::*;
+// ANCHOR_END: use
 
+// ANCHOR: game
 #[account]
 pub struct Game {
     players: [Pubkey; 2],          // (32 * 2)
@@ -10,7 +13,9 @@ pub struct Game {
     board: [[Option<Sign>; 3]; 3], // 9 * (1 + 1) = 18
     state: GameState,              // 32 + 1
 }
+// ANCHOR_END: game
 
+// ANCHOR: impl
 impl Game {
     pub const MAXIMUM_SIZE: usize = (32 * 2) + 1 + (9 * (1 + 1)) + (32 + 1);
 
@@ -110,7 +115,9 @@ impl Game {
         self.state = GameState::Tie;
     }
 }
+// ANCHOR_END: impl
 
+// ANCHOR: gamestate
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
 pub enum GameState {
     Active,
@@ -125,9 +132,12 @@ pub enum Sign {
     X,
     O,
 }
+// ANCHOR_END: gamestate
 
+// ANCHOR: tile
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct Tile {
     row: u8,
     column: u8,
 }
+// ANCHOR_END: tile

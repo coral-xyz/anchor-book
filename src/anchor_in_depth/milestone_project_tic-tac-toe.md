@@ -1,4 +1,4 @@
-# Milestone Project - Tic-Tac-Toe
+# Milestone Project: Tic-Tac-Toe
 > [Program Code](https://github.com/project-serum/anchor-book/tree/master/programs/tic-tac-toe)
 
 You're now ready to build your first anchor project. Create a new anchor workspace with
@@ -17,154 +17,28 @@ We recommend keeping programs in a single `lib.rs` file until they get too big. 
 
 Let's begin by thinking about what data we should store. Each game has players, turns, a board, and a game state. This game state describes whether the game is active, tied, or one of the two players won. We can save all this data in an account. This means that each new game will have its own account. Add the following to the bottom of the `lib.rs` file:
 ```rust,ignore
-#[account]
-pub struct Game {
-    players: [Pubkey; 2],          // (32 * 2)
-    turn: u8,                      // 1
-    board: [[Option<Sign>; 3]; 3], // 9 * (1 + 1) = 18
-    state: GameState,              // 32 + 1
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/state/game.rs:game}}
 ```
 This is the game account. Next to the field definitions, you can see how many bytes each field requires. This will be very important later. Let's also add the `Sign` and the `GameState` type.
 ```rust,ignore
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
-pub enum GameState {
-    Active,
-    Tie,
-    Won { winner: Pubkey },
-}
-
-#[derive(
-    AnchorSerialize,
-    AnchorDeserialize,
-    FromPrimitive,
-    ToPrimitive,
-    Copy,
-    Clone,
-    PartialEq,
-    Eq
-)]
-pub enum Sign {
-    X,
-    O,
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/state/game.rs:gamestate}}
 ```
 
 Both `GameState` and `Sign` derive some traits. `AnchorSerialize` and `AnchorDeserialize` are the crucial ones. All types that are used in types that are marked with `#[account]` must implement these two traits (or be marked with `#[account]` themselves). All other traits are important to our game logic and we are going to use them later. Generally, it is good practice to derive even more traits to make the life of others trying to interface with your program easier (see [Rust's API guidelines](https://rust-lang.github.io/api-guidelines/interoperability.html#types-eagerly-implement-common-traits-c-common-traits)) but for brevity's sake, we are not going to do that in this guide.
 
 This won't quite work yet because `FromPrimitive` and `ToPrimitive` are unknown. Go to the `Cargo.toml` file right outside `src` (not the one at the root of the workspace) and add these two dependencies:
 ```toml
-num-traits = "0.2"
-num-derive = "0.3"
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/Cargo.toml:deps}}
 ```
 Then, import them at the top of `lib.rs`:
 ```rust,ignore
-use num_derive::*;
-use num_traits::*;
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/state/game.rs:use}}
 ```
 
 Now add the game logic:
 
 ```rust,ignore
-impl Game {
-    pub const MAXIMUM_SIZE: usize = (32 * 2) + 1 + (9 * (1 + 1)) + (32 + 1);
-
-    pub fn start(&mut self, players: [Pubkey; 2]) -> Result<()> {
-        require_eq!(self.turn, 0, TicTacToeError::GameAlreadyStarted);
-        self.players = players;
-        self.turn = 1;
-        Ok(())
-    }
-
-    pub fn is_active(&self) -> bool {
-        self.state == GameState::Active
-    }
-
-    fn current_player_index(&self) -> usize {
-        ((self.turn - 1) % 2) as usize
-    }
-
-    pub fn current_player(&self) -> Pubkey {
-        self.players[self.current_player_index()]
-    }
-
-    pub fn play(&mut self, tile: &Tile) -> Result<()> {
-        require!(self.is_active(), TicTacToeError::GameAlreadyOver);
-
-        match tile {
-            tile @ Tile {
-                row: 0..=2,
-                column: 0..=2,
-            } => match self.board[tile.row as usize][tile.column as usize] {
-                Some(_) => return Err(TicTacToeError::TileAlreadySet.into()),
-                None => {
-                    self.board[tile.row as usize][tile.column as usize] =
-                        Some(Sign::from_usize(self.current_player_index()).unwrap());
-                }
-            },
-            _ => return Err(TicTacToeError::TileOutOfBounds.into()),
-        }
-
-        self.update_state();
-
-        if GameState::Active == self.state {
-            self.turn += 1;
-        }
-
-        Ok(())
-    }
-
-    fn is_winning_trio(&self, trio: [(usize, usize); 3]) -> bool {
-        let [first, second, third] = trio;
-        self.board[first.0][first.1].is_some()
-            && self.board[first.0][first.1] == self.board[second.0][second.1]
-            && self.board[first.0][first.1] == self.board[third.0][third.1]
-    }
-
-    fn update_state(&mut self) {
-        for i in 0..=2 {
-            // three of the same in one row
-            if self.is_winning_trio([(i, 0), (i, 1), (i, 2)]) {
-                self.state = GameState::Won {
-                    winner: self.current_player(),
-                };
-                return;
-            }
-            // three of the same in one column
-            if self.is_winning_trio([(0, i), (1, i), (2, i)]) {
-                self.state = GameState::Won {
-                    winner: self.current_player(),
-                };
-                return;
-            }
-        }
-
-        // three of the same in one diagonal
-        if self.is_winning_trio([(0, 0), (1, 1), (2, 2)])
-            || self.is_winning_trio([(0, 2), (1, 1), (2, 0)])
-        {
-            self.state = GameState::Won {
-                winner: self.current_player(),
-            };
-            return;
-        }
-
-        // reaching this code means the game has not been won,
-        // so if there are unfilled tiles left, it's still active
-        for row in 0..=2 {
-            for column in 0..=2 {
-                if self.board[row][column].is_none() {
-                    return;
-                }
-            }
-        }
-
-        // game has not been won
-        // game has no more free tiles
-        // -> game ends in a tie
-        self.state = GameState::Tie;
-    }
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/state/game.rs:impl}}
 ```
 
 We are not going to explore this code in detail together because it's rather simple rust code. It's just tic-tac-toe after all! Roughly, what happens when `play` is called:
@@ -177,23 +51,12 @@ return error if tile on board is already set
 
 Currently, the code doesn't compile because we need to add the `Tile`
 ```rust,ignore
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct Tile {
-    row: u8,
-    column: u8,
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/state/game.rs:tile}}
 ```
 
 and the `TicTacToeError` type.
 ```rust,ignore
-#[error_code]
-pub enum TicTacToeError {
-    TileOutOfBounds,
-    TileAlreadySet,
-    GameAlreadyOver,
-    NotPlayersTurn,
-    GameAlreadyStarted
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/errors.rs:errors}}
 ```
 
 ### The Setup Instruction
@@ -230,14 +93,7 @@ pub struct SetupGame<'info> {
 
 There's one more thing to do to complete `SetupGame`. Every account is created with a fixed amount of space, so we have to add this space to the instruction as well. This is what the comments next to the `Game` struct indicated.
 ```rust,ignore
-#[derive(Accounts)]
-pub struct SetupGame<'info> {
-    #[account(init, payer = player_one, space = 8 + Game::MAXIMUM_SIZE)]
-    pub game: Account<'info, Game>,
-    #[account(mut)]
-    pub player_one: Signer<'info>,
-    pub system_program: Program<'info, System>
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/instructions/setup_game.rs:struct}}
 ```
 
 Let us briefly explain how we arrived at the `Game::MAXIMUM_SIZE`. Anchor uses the [borsh](https://borsh.io) specification to (de)serialize its state accounts.
@@ -265,9 +121,7 @@ Why didn't we just add `player_two` as an account in the accounts struct? There 
 
 Finish the instruction function by setting the game to its initial values:
 ```rust,ignore
-pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> Result<()> {
-    ctx.accounts.game.start([ctx.accounts.player_one.key(), player_two])
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/instructions/setup_game.rs:fn}}
 ```
 
 Now, run `anchor build`. On top of compiling your program, this command creates an [IDL](https://en.wikipedia.org/wiki/Interface_description_language) for your program. You can find it in `target/idl`. The anchor typescript client can automatically parse this IDL and generate functions based on it. What this means is that each anchor program gets its own typescript client for free! (Technically, you don't have to call `anchor build` before testing. `anchor test` will do it for you.)
@@ -276,34 +130,12 @@ Now, run `anchor build`. On top of compiling your program, this command creates 
 
 Time to test our code! Head over into the `tests` folder in the root directory. Open the `tic-tac-toe.ts` file and remove the existing `it` test. Then, put the following into the `describe` section:
 ```typescript
-  it('setup game!', async() => {
-    const gameKeypair = anchor.web3.Keypair.generate();
-    const playerOne = (program.provider as anchor.AnchorProvider).wallet;
-    const playerTwo = anchor.web3.Keypair.generate();
-    await program.methods
-      .setupGame(playerTwo.publicKey)
-      .accounts({
-        game: gameKeypair.publicKey,
-        playerOne: playerOne.publicKey,
-      })
-      .signers([gameKeypair])
-      .rpc();
-
-    let gameState = await program.account.game.fetch(gameKeypair.publicKey);
-    expect(gameState.turn).to.equal(1);
-    expect(gameState.players)
-      .to
-      .eql([playerOne.publicKey, playerTwo.publicKey]);
-    expect(gameState.state).to.eql({ active: {} });
-    expect(gameState.board)
-      .to
-      .eql([[null,null,null],[null,null,null],[null,null,null]]);
-  });
+{{#include ../../programs/tic-tac-toe/tests/tic-tac-toe.ts:setup-game}}
 ```
 
 and add this to the top of your file:
 ```typescript
-import { expect } from 'chai';
+{{#include ../../programs/tic-tac-toe/tests/tic-tac-toe.ts:chai-import}}
 ```
 
 > When you adjust your test files it may happen that you'll see errors everywhere.
@@ -328,29 +160,14 @@ Now, run `anchor test`. This starts up (and subsequently shuts down) a local val
 
 The `Play` accounts struct is straightforward. We need the game and a player:
 ```rust,ignore
-#[derive(Accounts)]
-pub struct Play<'info> {
-    #[account(mut)]
-    pub game: Account<'info, Game>,
-    pub player: Signer<'info>,
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/instructions/play.rs:struct}}
 ```
 
 `player` needs to sign or someone else could play for the player.
 
 Finally, we can add the `play` function inside the program module.
 ```rust,ignore
-pub fn play(ctx: Context<Play>, tile: Tile) -> Result<()> {
-    let game = &mut ctx.accounts.game;
-
-    require_keys_eq!(
-        game.current_player(),
-        ctx.accounts.player.key(),
-        TicTacToeError::NotPlayersTurn
-    );
-
-    game.play(&tile)
-}
+{{#include ../../programs/tic-tac-toe/programs/tic-tac-toe/src/instructions/play.rs:fn}}
 ```
 
 We've checked in the accounts struct that the `player` account has signed the transaction, but we do not check that it is the `player` we expect. That's what the `require_keys_eq` check in `play` is for.
@@ -359,24 +176,7 @@ We've checked in the accounts struct that the `player` account has signed the tr
 
 Testing the `play` instruction works the exact same way. To avoid repeating yourself, create a helper function at the top of the test file:
 ```typescript
-async function play(program: Program<TicTacToe>, game, player,
-    tile, expectedTurn, expectedGameState, expectedBoard) {
-  await program.methods
-    .play(tile)
-    .accounts({
-      player: player.publicKey,
-      game
-    })
-    .signers(player instanceof (anchor.Wallet as any) ? [] : [player])
-    .rpc();
-
-  const gameState = await program.account.game.fetch(game);
-  expect(gameState.turn).to.equal(expectedTurn);
-  expect(gameState.state).to.eql(expectedGameState);
-  expect(gameState.board)
-    .to
-    .eql(expectedBoard);
-}
+{{#include ../../programs/tic-tac-toe/tests/tic-tac-toe.ts:play-func}}
 ```
 
 You can create then a new `it` test, setup the game like in the previous test, but then keep calling the `play` function you just added to simulate a complete run of the game. Let's begin with the first turn:
@@ -426,59 +226,13 @@ You can finish writing the test by yourself (or check out [the reference impleme
 
 Proper testing also includes tests that try to exploit the contract. You can check whether you've protected yourself properly by calling `play` with unexpected parameters. You can also familiarize yourself with the returned `AnchorErrors` this way. For example:
 ```typescript
-try {
-  await play(
-    program,
-    gameKeypair.publicKey,
-    playerTwo,
-    {row: 5, column: 1}, // ERROR: out of bounds row
-    4,
-    { active: {}, },
-    [
-      [{x:{}},{x: {}},null],
-      [{o:{}},null,null],
-      [null,null,null]
-    ]
-  );
-  // we use this to make sure we definitely throw an error
-  chai.assert(false, "should've failed but didn't ");
-} catch (_err) {
-    expect(_err).to.be.instanceOf(AnchorError);
-    const err: AnchorError = _err;
-    expect(err.error.errorCode.number).to.equal(6000);
-}
+{{#include ../../programs/tic-tac-toe/tests/tic-tac-toe.ts:out-of-bound-error}}
 ```
 
 or 
 
 ```typescript
-try {
-    await play(
-    program,
-    gameKeypair.publicKey,
-    playerOne, // ERROR: same player in subsequent turns
-    
-    // change sth about the tx because
-    // duplicate tx that come in too fast
-    // after each other may get dropped
-    {row: 1, column: 0},
-    2,
-    { active: {}, },
-    [
-        [{x:{}},null,null],
-        [null,null,null],
-        [null,null,null]
-    ]
-    );
-    chai.assert(false, "should've failed but didn't ");
-} catch (_err) {
-    expect(_err).to.be.instanceOf(AnchorError);
-    const err: AnchorError = _err;
-    expect(err.error.errorCode.code).to.equal("NotPlayersTurn");
-    expect(err.error.errorCode.number).to.equal(6003);
-    expect(err.program.equals(program.programId)).is.true;
-    expect(err.error.comparedValues).to.deep.equal([playerTwo.publicKey, playerOne.publicKey]);
-}
+{{#include ../../programs/tic-tac-toe/tests/tic-tac-toe.ts:not-player-turn-error}}
 ```
 
 ## Deployment
