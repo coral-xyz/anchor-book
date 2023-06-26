@@ -24,7 +24,7 @@
     - [Zero-Copy]()
     - [Access Control]()
     - [Building & Testing]()
-    - [Milestone Project - The Nightclub]()
+    - [Milestone Project - IDO Program](./anchor_in_depth/milestone_project_ido-program.md)
 - [Anchor BTS]()
   - [Dispatch]()
   - [The Discriminator]()
