@@ -248,7 +248,6 @@ pub struct ExchangeFiatForRedeemable<'info> {
 
     pub token_program: Program<'info, Token>,
 
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
