@@ -189,6 +189,8 @@ pub struct InitializePool<'info> {
 
     pub token_program: Program<'info, Token>,
 
+
+
     pub system_program: Program<'info, System>,
 }
 
@@ -250,7 +252,7 @@ pub struct ExchangeRedeemableForNative<'info> {
 
     #[account(
         mut,
-        constraint = redeemable_mint.mint_authority == COption::Some(*pool_signer.key)
+        mint::authority = pool_signer
     )]
     pub redeemable_mint: Account<'info, Mint>,
 
@@ -266,7 +268,6 @@ pub struct ExchangeRedeemableForNative<'info> {
     #[account(mut, constraint = investor_redeemable.owner == *authority.key)]
     pub investor_redeemable: Account<'info, TokenAccount>,
 
-    #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
 }
 
@@ -279,7 +280,7 @@ pub struct WithdrawPoolFiat<'info> {
     #[account(seeds = [pool.native_mint.as_ref()], bump = pool.bump)]
     pub pool_signer: AccountInfo<'info>,
 
-    #[account(mut, constraint = pool_fiat.mint == *fiat_mint.to_account_info().key)]
+    #[account(adress = pool_fiat.mint)]
     pub fiat_mint: Account<'info, Mint>,
 
     #[account(mut, constraint = pool_fiat.owner == *pool_signer.key)]
@@ -291,7 +292,6 @@ pub struct WithdrawPoolFiat<'info> {
     #[account(mut)]
     pub creator_fiat: Account<'info, TokenAccount>,
 
-    #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
 }
 
