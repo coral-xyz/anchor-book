@@ -91,7 +91,7 @@ pub mod ido_program {
             to: ctx.accounts.investor_redeemable.to_account_info(),
             authority: ctx.accounts.pool_signer.clone(),
         };
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
         token::mint_to(cpi_ctx, amount)?;
         
