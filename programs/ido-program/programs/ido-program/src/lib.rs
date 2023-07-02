@@ -195,7 +195,6 @@ pub struct InitializePool<'info> {
     #[account(mut)]
     pub creator_native: Box<Account<'info, TokenAccount>>,
 
-    #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
 
     pub rent: Sysvar<'info, Rent>,
