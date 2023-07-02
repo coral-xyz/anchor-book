@@ -229,7 +229,7 @@ pub struct ExchangeFiatForRedeemable<'info> {
 
     #[account(
         mut,
-        constraint = redeemable_mint.mint_authority == COption::Some(*pool_signer.key)
+        mint::authority = pool_signer
     )]
     pub redeemable_mint: Account<'info, Mint>,
 
