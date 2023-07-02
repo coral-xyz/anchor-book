@@ -50,7 +50,7 @@ pub mod ido_program {
             authority: ctx.accounts.authority.to_account_info(),
         };
 
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, total_native_tokens)?;
 
