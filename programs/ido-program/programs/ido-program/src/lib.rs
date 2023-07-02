@@ -189,8 +189,6 @@ pub struct InitializePool<'info> {
 
     pub token_program: Program<'info, Token>,
 
-
-
     pub system_program: Program<'info, System>,
 }
 
@@ -392,9 +390,7 @@ fn unrestricted_phase<'info>(ctx: &Context<ExchangeFiatForRedeemable<'info>>) ->
 }
 
 //iDO Over
-fn ido_over<'info>(
-    pool_account: &Account<'info, PoolAccount>,
-) -> Result<()> {
+fn ido_over<'info>(pool_account: &Account<'info, PoolAccount>) -> Result<()> {
     if !(pool_account.end_ido_ts < Clock::get().unwrap().unix_timestamp) {
         return Err(ErrorCode::IdoNotOver.into());
     }
@@ -402,9 +398,7 @@ fn ido_over<'info>(
 }
 
 //Can Withdraw fiat
-fn can_withdraw_fiat<'info>(
-    pool_account: &Account<'info, PoolAccount>,
-) -> Result<()> {
+fn can_withdraw_fiat<'info>(pool_account: &Account<'info, PoolAccount>) -> Result<()> {
     if !(pool_account.withdraw_fiat_ts < Clock::get().unwrap().unix_timestamp) {
         return Err(ErrorCode::CannotWithdrawYet.into());
     }
