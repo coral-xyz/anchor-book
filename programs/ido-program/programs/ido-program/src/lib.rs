@@ -303,7 +303,6 @@ pub struct WithdrawPoolFiat<'info> {
     #[account(mut)]
     pub creator_fiat: Account<'info, TokenAccount>,
 
-    #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
 
     pub clock: Sysvar<'info, Clock>,
