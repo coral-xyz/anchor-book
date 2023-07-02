@@ -114,7 +114,7 @@ pub mod ido_program {
             authority: ctx.accounts.authority.to_account_info(),
         };
 
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
         token::burn(cpi_ctx, ctx.accounts.investor_redeemable.amount)?;
