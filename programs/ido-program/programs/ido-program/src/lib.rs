@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program_option::COption;
-use anchor_spl::token::{self, Burn, Mint, MintTo, TokenAccount, Transfer, Token};
+use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount, Transfer};
 
 declare_id!("GYpxvUxtesyBSn69gnbfQChoUyJ7qdsG9nXS2Y2dQNH6");
 
@@ -8,19 +8,16 @@ declare_id!("GYpxvUxtesyBSn69gnbfQChoUyJ7qdsG9nXS2Y2dQNH6");
 pub mod ido_program {
     use super::*;
 
-    #[access_control(InitializePool::accounts(&ctx, bump) pre_ido_phase(&ctx, start_ido_ts))]
+    #[access_control(InitializePool::accounts(&ctx, bump) pre_ido_phase(start_ido_ts))]
     pub fn initialize_pool(
         ctx: Context<InitializePool>,
-        total_native_tokens: u64, 
-        start_ido_ts: i64, 
+        total_native_tokens: u64,
+        start_ido_ts: i64,
         end_ido_ts: i64,
         withdraw_fiat_ts: i64,
         bump: u8,
     ) -> Result<()> {
-
-        if !(start_ido_ts < end_ido_ts
-                && end_ido_ts < withdraw_fiat_ts)
-        {
+        if !(start_ido_ts < end_ido_ts && end_ido_ts < withdraw_fiat_ts) {
             return Err(ErrorCode::NonSequentialTimestamps.into());
         }
 
@@ -69,7 +66,7 @@ pub mod ido_program {
         if ctx.accounts.investor_fiat.amount < amount {
             return Err(ErrorCode::LowFiat.into());
         }
-        
+
         // Transfer investor's fiat to pool fiat account.
         let cpi_accounts = Transfer {
             from: ctx.accounts.investor_fiat.to_account_info(),
@@ -79,11 +76,11 @@ pub mod ido_program {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, amount)?;
-        
+
         // Mint Redeemable to investor Redeemable account.
         let seeds = &[
-        ctx.accounts.pool.native_mint.as_ref(),
-        &[ctx.accounts.pool.bump],
+            ctx.accounts.pool.native_mint.as_ref(),
+            &[ctx.accounts.pool.bump],
         ];
         let signer = &[&seeds[..]];
         let cpi_accounts = MintTo {
@@ -94,19 +91,17 @@ pub mod ido_program {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
         token::mint_to(cpi_ctx, amount)?;
-        
+
         Ok(())
     }
 
-    #[access_control(ido_over(&ctx.accounts.pool, &ctx.accounts.clock))]
-    pub fn exchange_redeemable_for_native(
-        ctx: Context<ExchangeRedeemableForNative>,
-    ) -> Result<()> {
+    #[access_control(ido_over(&ctx.accounts.pool))]
+    pub fn exchange_redeemable_for_native(ctx: Context<ExchangeRedeemableForNative>) -> Result<()> {
         let native_amount = (ctx.accounts.investor_redeemable.amount as u128)
-        .checked_mul(ctx.accounts.pool_native.amount as u128)
-        .unwrap()
-        .checked_div(ctx.accounts.redeemable_mint.supply as u128)
-        .unwrap();
+            .checked_mul(ctx.accounts.pool_native.amount as u128)
+            .unwrap()
+            .checked_div(ctx.accounts.redeemable_mint.supply as u128)
+            .unwrap();
 
         let cpi_accounts = Burn {
             mint: ctx.accounts.redeemable_mint.to_account_info(),
@@ -118,7 +113,6 @@ pub mod ido_program {
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
         token::burn(cpi_ctx, ctx.accounts.investor_redeemable.amount)?;
-
 
         let seeds = &[
             ctx.accounts.pool.native_mint.as_ref(),
@@ -140,27 +134,25 @@ pub mod ido_program {
         Ok(())
     }
 
-    #[access_control(can_withdraw_fiat(&ctx.accounts.pool, &ctx.accounts.clock))]
-        pub fn withdraw_pool_fiat(ctx: Context<WithdrawPoolFiat>) -> Result<()> {            
-            let seeds = &[
-                ctx.accounts.pool.native_mint.as_ref(),
-                &[ctx.accounts.pool.bump],
-            ];
-            let signer = &[&seeds[..]];
-            let cpi_accounts = Transfer {
-                from: ctx.accounts.pool_fiat.to_account_info(),
-                to: ctx.accounts.creator_fiat.to_account_info(),
-                authority: ctx.accounts.pool_signer.to_account_info(),
-            };
-            let cpi_program = ctx.accounts.token_program.to_account_info();
-            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-            token::transfer(cpi_ctx, ctx.accounts.pool_fiat.amount)?;
+    #[access_control(can_withdraw_fiat(&ctx.accounts.pool))]
+    pub fn withdraw_pool_fiat(ctx: Context<WithdrawPoolFiat>) -> Result<()> {
+        let seeds = &[
+            ctx.accounts.pool.native_mint.as_ref(),
+            &[ctx.accounts.pool.bump],
+        ];
+        let signer = &[&seeds[..]];
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.pool_fiat.to_account_info(),
+            to: ctx.accounts.creator_fiat.to_account_info(),
+            authority: ctx.accounts.pool_signer.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
+        token::transfer(cpi_ctx, ctx.accounts.pool_fiat.amount)?;
 
-            Ok(())
-        }
+        Ok(())
+    }
 }
-
-
 
 #[derive(Accounts)]
 pub struct InitializePool<'info> {
@@ -172,7 +164,7 @@ pub struct InitializePool<'info> {
     pub pool_signer: AccountInfo<'info>,
 
     #[account(
-        mint::authority = pool_signer
+        mint::authority = pool_signer,
         constraint = redeemable_mint.supply == 0
     )]
     pub redeemable_mint: Box<Account<'info, Mint>>,
@@ -196,10 +188,6 @@ pub struct InitializePool<'info> {
     pub creator_native: Box<Account<'info, TokenAccount>>,
 
     pub token_program: Program<'info, Token>,
-
-    pub rent: Sysvar<'info, Rent>,
-
-    pub clock: Sysvar<'info, Clock>,
 
     pub system_program: Program<'info, System>,
 }
@@ -225,7 +213,7 @@ pub struct ExchangeFiatForRedeemable<'info> {
 
     ///CHECK: This is not dangerous
     #[account(seeds = [pool.native_mint.as_ref()], bump = pool.bump)]
-    pool_signer: AccountInfo<'info>,
+    pub pool_signer: AccountInfo<'info>,
 
     #[account(
         mut,
@@ -249,8 +237,6 @@ pub struct ExchangeFiatForRedeemable<'info> {
     pub investor_redeemable: Account<'info, TokenAccount>,
 
     pub token_program: Program<'info, Token>,
-
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -260,7 +246,7 @@ pub struct ExchangeRedeemableForNative<'info> {
 
     /// CHECK: This is not dangerous
     #[account(seeds = [pool.native_mint.as_ref()], bump = pool.bump)]
-    pool_signer: AccountInfo<'info>,
+    pub pool_signer: AccountInfo<'info>,
 
     #[account(
         mut,
@@ -282,8 +268,6 @@ pub struct ExchangeRedeemableForNative<'info> {
 
     #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
-
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
@@ -309,8 +293,6 @@ pub struct WithdrawPoolFiat<'info> {
 
     #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
-
-    pub clock: Sysvar<'info, Clock>,
 }
 
 #[account]
@@ -320,35 +302,34 @@ pub struct PoolAccount {
 
     /// Mint of redeemable tokens (Intermediate tokens which will be exchanged for native tokens)
     pub redeemable_mint: Pubkey,
-    
+
     /// Mint of project tokens
     pub native_mint: Pubkey,
-    
+
     /// Mint of fiat tokens
     pub fiat_mint: Pubkey,
 
     /// Token Account of Pool associated with the project token mint
     pub pool_native: Pubkey,
-    
+
     /// Token Account of Pool associated with fiat mint
     pub pool_fiat: Pubkey,
 
     /// Total number of native tokens being distributed
     pub total_native_tokens: u64,
-    
+
     /// Unix timestamp for starting IDO
     pub start_ido_ts: i64,
-    
+
     /// Unix timestamp for ending IDO
     pub end_ido_ts: i64,
-    
+
     /// Unix timestamp for withdrawing Fiat from pool
     pub withdraw_fiat_ts: i64,
 
     /// Bump
     pub bump: u8,
 }
-
 
 impl PoolAccount {
     pub const LEN: usize = DISCRIMINATOR_LENGTH   // Discriminator Length
@@ -362,7 +343,7 @@ impl PoolAccount {
         + DATA_LENGTH_64                          // Start IDO TS
         + DATA_LENGTH_64                          // End IDO TS
         + DATA_LENGTH_64                          // Withdraw Fiat TS
-        + DATA_LENGTH_8;                          // Bump
+        + DATA_LENGTH_8; // Bump
 }
 
 const DISCRIMINATOR_LENGTH: usize = 8;
@@ -387,15 +368,14 @@ pub enum ErrorCode {
     #[msg("IDO has not ended yet")]
     IdoNotOver,
     #[msg("Cannot withdraw Fiat yet")]
-    CannotWithdrawYet
+    CannotWithdrawYet,
 }
-
 
 // Access Control Modifiers
 
 // IDO Starts in the Future
-fn pre_ido_phase<'info>(ctx: &Context<InitializePool<'info>>, start_ido_ts: i64) -> Result<()> {
-    if !(ctx.accounts.clock.unix_timestamp < start_ido_ts) {
+fn pre_ido_phase<'info>(start_ido_ts: i64) -> Result<()> {
+    if !(Clock::get().unwrap().unix_timestamp < start_ido_ts) {
         return Err(ErrorCode::IdoFuture.into());
     }
     Ok(())
@@ -403,11 +383,9 @@ fn pre_ido_phase<'info>(ctx: &Context<InitializePool<'info>>, start_ido_ts: i64)
 
 // Unrestricted Phase
 fn unrestricted_phase<'info>(ctx: &Context<ExchangeFiatForRedeemable<'info>>) -> Result<()> {
-    if !(
-            ctx.accounts.pool.start_ido_ts < ctx.accounts.clock.unix_timestamp
-            && 
-            ctx.accounts.pool.end_ido_ts > ctx.accounts.clock.unix_timestamp
-        ) {
+    if !(ctx.accounts.pool.start_ido_ts < Clock::get().unwrap().unix_timestamp
+        && ctx.accounts.pool.end_ido_ts > Clock::get().unwrap().unix_timestamp)
+    {
         return Err(ErrorCode::WrongInvestingTime.into());
     }
     Ok(())
@@ -416,9 +394,8 @@ fn unrestricted_phase<'info>(ctx: &Context<ExchangeFiatForRedeemable<'info>>) ->
 //iDO Over
 fn ido_over<'info>(
     pool_account: &Account<'info, PoolAccount>,
-    clock: &Sysvar<'info, Clock>,
 ) -> Result<()> {
-    if !(pool_account.end_ido_ts < clock.unix_timestamp) {
+    if !(pool_account.end_ido_ts < Clock::get().unwrap().unix_timestamp) {
         return Err(ErrorCode::IdoNotOver.into());
     }
     Ok(())
@@ -427,9 +404,8 @@ fn ido_over<'info>(
 //Can Withdraw fiat
 fn can_withdraw_fiat<'info>(
     pool_account: &Account<'info, PoolAccount>,
-    clock: &Sysvar<'info, Clock>,
 ) -> Result<()> {
-    if !(pool_account.withdraw_fiat_ts < clock.unix_timestamp) {
+    if !(pool_account.withdraw_fiat_ts < Clock::get().unwrap().unix_timestamp) {
         return Err(ErrorCode::CannotWithdrawYet.into());
     }
     Ok(())

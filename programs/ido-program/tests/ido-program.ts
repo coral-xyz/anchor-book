@@ -1,4 +1,4 @@
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { Transaction, SystemProgram, PublicKey } from "@solana/web3.js";
 import {
     createAccount,
@@ -8,7 +8,7 @@ import {
     mintTo,
     TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { Program } from "@project-serum/anchor";
+import { Program } from "@coral-xyz/anchor";
 import { assert } from "chai";
 import { IdoProgram } from "../target/types/ido_program";
 
@@ -90,62 +90,44 @@ describe("ido-program", () => {
             provider.connection,
             payer,
             mintAuthority.publicKey,
-            undefined,
-            0,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            null,
+            0
         );
 
         nativeMint = await createMint(
             provider.connection,
             payer,
             mintAuthority.publicKey,
-            undefined,
-            0,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            null,
+            0
         );
 
         projectFiat = await createAccount(
             provider.connection,
             payer,
             fiatMint,
-            project.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            project.publicKey
         );
 
         projectNative = await createAccount(
             provider.connection,
             payer,
             nativeMint,
-            project.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            project.publicKey
         );
 
         investorFiat = await createAccount(
             provider.connection,
             payer,
             fiatMint,
-            investor.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            investor.publicKey
         );
 
         investorNative = await createAccount(
             provider.connection,
             payer,
             nativeMint,
-            investor.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            investor.publicKey
         );
 
         await mintTo(
@@ -190,21 +172,15 @@ describe("ido-program", () => {
             provider.connection,
             payer,
             poolSigner,
-            undefined,
-            0,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            null,
+            0
         );
 
         investorRedeemable = await createAccount(
             provider.connection,
             payer,
             redeemableMint,
-            investor.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            investor.publicKey
         );
 
         let poolNativeAccount = await getOrCreateAssociatedTokenAccount(
@@ -213,9 +189,6 @@ describe("ido-program", () => {
             nativeMint,
             poolSigner,
             true,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID,
             undefined
         );
 
@@ -227,9 +200,6 @@ describe("ido-program", () => {
             fiatMint,
             poolSigner,
             true,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID,
             undefined
         );
 
@@ -259,7 +229,6 @@ describe("ido-program", () => {
                 authority: project.publicKey,
                 creatorNative: projectNative,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                rent: anchor.web3.SYSVAR_RENT_PUBKEY,
                 clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
                 systemProgram: anchor.web3.SystemProgram.programId,
             })
