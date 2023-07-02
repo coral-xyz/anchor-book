@@ -233,7 +233,7 @@ pub struct ExchangeFiatForRedeemable<'info> {
     )]
     pub redeemable_mint: Account<'info, Mint>,
 
-    #[account(mut, constraint = pool_fiat.mint == *fiat_mint.to_account_info().key)]
+    #[account(mut, address = pool_fiat.mint)]
     pub fiat_mint: Account<'info, Mint>,
 
     #[account(mut, constraint = pool_fiat.owner == *pool_signer.key)]
