@@ -248,7 +248,6 @@ pub struct ExchangeFiatForRedeemable<'info> {
     #[account(mut, constraint = investor_redeemable.owner == *authority.key)]
     pub investor_redeemable: Account<'info, TokenAccount>,
 
-    #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
 
     pub clock: Sysvar<'info, Clock>,
