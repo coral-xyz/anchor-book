@@ -177,7 +177,7 @@ pub struct InitializePool<'info> {
     )]
     pub redeemable_mint: Box<Account<'info, Mint>>,
 
-    #[account(constraint = fiat_mint.decimals == redeemable_mint.decimals)]
+    #[account(mint::decimals = redeemable_mint.decimals)]
     pub fiat_mint: Box<Account<'info, Mint>>,
 
     #[account(constraint = pool_native.mint == *native_mint.to_account_info().key)]
