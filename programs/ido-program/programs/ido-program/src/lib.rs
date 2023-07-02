@@ -132,7 +132,7 @@ pub mod ido_program {
             authority: ctx.accounts.pool_signer.to_account_info(),
         };
 
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
 
         token::transfer(cpi_ctx, native_amount as u64)?;
