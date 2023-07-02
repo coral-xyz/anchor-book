@@ -8,7 +8,7 @@ It is now time to implement the in-depth concepts you learned in section 4 of th
 anchor init ido-program
 ```
 
-As the name suggests, this is a program that helps projects do an Initial DEX Offering to retail investors.
+As the name suggests, this is a program that helps projects do an Initial DEX Offering to investors.
 
 This program will be doing a couple of things. In an IDO, a project distributes its native tokens among willing investors. There are a few types of IDOs which are done. We will be implementing a fair launch IDO platform. In here, a project escrows the native tokens into a pool. When the IDO opens, investors come and deposit their fiat tokens into the pool. After the IDO is over, investors can claim their native tokens, the amount of which is calculated by the the pool percentage share of their deposit. The project can also finally withdraw all the deposited fiat tokens.
 
@@ -455,11 +455,11 @@ pub enum ErrorCode {
     NonSequentialTimestamps,
     #[msg("Invalid Parameter")]
     InvalidParameter,
-		#[msg("Invalid Bump")]
+	#[msg("Invalid Bump")]
     InvalidBump,
     #[msg("IDO has not begun yet")]
     IdoFuture,
-		#[msg("Not the correct time to invest")]
+	#[msg("Not the correct time to invest")]
     WrongInvestingTime,
     #[msg("Insufficient Fiat Tokens")]
     LowFiat
@@ -839,9 +839,9 @@ describe("ido-program", () => {
 Now let’s write the first test
 
 ```ts
-		//--snip--
+	//--snip--
 
-		it("Can initialize the program state", async () => {
+	it("Can initialize the program state", async () => {
         const transferSig = await provider.connection.requestAirdrop(
             payer.publicKey,
             10000000000
@@ -985,8 +985,9 @@ Now we are ready to test out our instructions.
 ### Initialize the Pool
 
 ```ts
-		//--snip--
-		it("Can initialize the Pool", async () => {
+	//--snip--
+
+	it("Can initialize the Pool", async () => {
         const [_poolSigner, bump] =
             anchor.web3.PublicKey.findProgramAddressSync(
                 [nativeMint.toBuffer()],
@@ -1136,9 +1137,9 @@ Run `anchor test`. It should show 2 tests passed.
 ### Exchange Investor Fiat for Redeemable Tokens
 
 ```ts
-		//--snip--
+	//--snip--
 
-		let deposit = 5000;
+	let deposit = 5000;
 
     it("Can exchange investor Fiat for redeemable tokens", async () => {
         if (Date.now() < startIdoTs.toNumber() * 1000) {
@@ -1213,8 +1214,8 @@ Running `anchor test` should now show 3 tests passed.
 ### Exchange User Redeemable For Native Tokens
 
 ```ts
-		//--snip--
-		it("Can exchange investor Redeemable tokens for Native tokens", async () => {
+	//--snip--
+	it("Can exchange investor Redeemable tokens for Native tokens", async () => {
         if (Date.now() < endIdoTs.toNumber() * 1000) {
             await sleep(endIdoTs.toNumber() * 1000 - Date.now() + 5000);
         }
@@ -1272,7 +1273,7 @@ Here also, we go through similar steps like the previous one.
 ### Withdraw Pool Fiat Tokens
 
 ```ts
-		it("Can withdraw total Fiat from pool account", async () => {
+	it("Can withdraw total Fiat from pool account", async () => {
         if (Date.now() < withDrawFiatTs.toNumber() * 1000) {
             await sleep(withDrawFiatTs.toNumber() * 1000 - Date.now() + 5000);
         }
