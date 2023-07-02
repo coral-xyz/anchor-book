@@ -74,7 +74,7 @@ pub mod ido_program {
         let cpi_accounts = Transfer {
             from: ctx.accounts.investor_fiat.to_account_info(),
             to: ctx.accounts.pool_fiat.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info().clone(),
+            authority: ctx.accounts.authority.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
