@@ -198,7 +198,6 @@ pub struct InitializePool<'info> {
     pub token_program: Program<'info, Token>,
 
 
-    pub clock: Sysvar<'info, Clock>,
 
     pub system_program: Program<'info, System>,
 }
