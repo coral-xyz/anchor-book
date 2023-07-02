@@ -172,7 +172,7 @@ pub struct InitializePool<'info> {
     pub pool_signer: AccountInfo<'info>,
 
     #[account(
-        constraint = redeemable_mint.mint_authority == COption::Some(*pool_signer.key), 
+        mint::authority = pool_signer
         constraint = redeemable_mint.supply == 0
     )]
     pub redeemable_mint: Box<Account<'info, Mint>>,
