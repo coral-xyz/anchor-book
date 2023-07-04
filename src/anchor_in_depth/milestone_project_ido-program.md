@@ -8,9 +8,9 @@ It is now time to implement the in-depth concepts you learned in section 4 of th
 anchor init ido-program
 ```
 
-As the name suggests, this is a program that helps projects do an Initial DEX Offering to investors.
+As the name suggests, this is a program that helps projects do an Initial DEX Offering to depositors.
 
-This program will be doing a couple of things. In an IDO, a project distributes its native tokens among willing investors. There are a few types of IDOs which are done. We will be implementing a fair launch IDO platform. In here, a project escrows the native tokens into a pool. When the IDO opens, investors come and deposit their fiat tokens into the pool. After the IDO is over, investors can claim their native tokens, the amount of which is calculated by the the pool percentage share of their deposit. The project can also finally withdraw all the deposited fiat tokens.
+This program will be doing a couple of things. In an IDO, a project distributes its native tokens among willing depositors. There are a few types of IDOs which are done. We will be implementing a fair launch IDO platform. In here, a project escrows the native tokens into a pool. When the IDO opens, depositors come and deposit their deposit tokens into the pool. After the IDO is over, depositors can claim their native tokens, the amount of which is calculated by the the pool percentage share of their deposit. The project can also finally withdraw all the deposited deposit tokens.
 
 We recommend keeping programs in a single `lib.rs` file.
 
@@ -18,7 +18,7 @@ We recommend keeping programs in a single `lib.rs` file.
 
 Let’s think about what information we would want to store in our pool account.
 We would want to know the authority of the pool.
-The mint public keys of the redeemable intermediary token, native tokens, and fiat tokens are also necessary to ensure that the correct tokens are deposited in the pool.
+The mint public keys of the redeemable intermediary token, native tokens, and deposit tokens are also necessary to ensure that the correct tokens are deposited in the pool.
 We would need to know the associated token accounts of the pool authority which would store and distribute tokens. Additionally, we would need to know the number of tokens being distributed.
 Finally, we would require the timestamps for the IDO and the bump associated with the pool PDA.
 Add the following code at the bottom of the `lib.rs` file
@@ -35,14 +35,14 @@ pub struct PoolAccount {
     /// Mint of project tokens
     pub native_mint: Pubkey,
 
-    /// Mint of fiat tokens
-    pub fiat_mint: Pubkey,
+    /// Mint of deposit tokens
+    pub deposit token_mint: Pubkey,
 
     /// Token Account of Pool associated with the project token mint
     pub pool_native: Pubkey,
 
-    /// Token Account of Pool associated with fiat mint
-    pub pool_fiat: Pubkey,
+    /// Token Account of Pool associated with deposit token mint
+    pub pool_deposit token: Pubkey,
 
     /// Total number of native tokens being distributed
     pub total_native_tokens: u64,
@@ -53,8 +53,8 @@ pub struct PoolAccount {
     /// Unix timestamp for ending IDO
     pub end_ido_ts: i64,
 
-    /// Unix timestamp for withdrawing fiat tokens from the pool
-    pub withdraw_fiat_ts: i64,
+    /// Unix timestamp for withdrawing deposit token from pool
+    pub withdraw_deposit token_ts: i64,
 
     /// Bump
     pub bump: u8,
@@ -64,15 +64,15 @@ impl PoolAccount {
     pub const LEN: usize = DISCRIMINATOR_LENGTH   // Discriminator Length
         + PUBKEY_LENGTH                           // Pool Authority
         + PUBKEY_LENGTH                           // Redeemable Mint
-        + PUBKEY_LENGTH                           // Fiat Mint
+        + PUBKEY_LENGTH                           // deposit token Mint
         + PUBKEY_LENGTH                           // Pool Native Token Account
         + PUBKEY_LENGTH                           // Native Mint
-        + PUBKEY_LENGTH                           // Pool fiat Token Account
+        + PUBKEY_LENGTH                           // Pool deposit token Account
         + DATA_LENGTH_64                          // Total Native Token Amount
         + DATA_LENGTH_64                          // Start IDO TS
         + DATA_LENGTH_64                          // End IDO TS
-        + DATA_LENGTH_64                          // Withdraw Native TS
-        + DATA_LENGTH_8;                          // Bump
+        + DATA_LENGTH_64                          // Withdraw deposit token TS
+        + DATA_LENGTH_8; // Bump
 }
 
 const DISCRIMINATOR_LENGTH: usize = 8;
@@ -85,7 +85,7 @@ This is all the data we store in `PoolAccount`. We also add the `impl` block for
 
 ## Instructions and Handler Functions
 
-Let’s think about our program flow. The program will have 4 instructions. We should be able to initialize a pool that will hold information regarding the IDO. When the IDO starts, investors should be able to exchange their fiat tokens for the same number of intermediary tokens. After the IDO is over, investors should be able to exchange their intermediary tokens for the project’s tokens. Finally, the project should be able to redeem all the fiat tokens from the pool.
+Let’s think about our program flow. The program will have 4 instructions. We should be able to initialize a pool that will hold information regarding the IDO. When the IDO starts, depositors should be able to exchange their deposit tokens for the same number of intermediary tokens. After the IDO is over, depositors should be able to exchange their intermediary tokens for the project’s tokens. Finally, the project should be able to redeem all the deposit tokens from the pool.
 
 ### Initializing the Pool
 
@@ -98,26 +98,30 @@ pub struct InitializePool<'info> {
     pub pool: Box<Account<'info, PoolAccount>>,
 
     /// CHECK: This is not dangerous
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [native_mint.key().as_ref()],
+        bump
+    )]
     pub pool_signer: AccountInfo<'info>,
 
     #[account(
-        constraint = redeemable_mint.mint_authority == COption::Some(*pool_signer.key),
+        mint::authority = pool_signer,
         constraint = redeemable_mint.supply == 0
     )]
     pub redeemable_mint: Box<Account<'info, Mint>>,
 
-    #[account(constraint = fiat_mint.decimals == redeemable_mint.decimals)]
-    pub fiat_mint: Box<Account<'info, Mint>>,
+    #[account(mint::decimals = redeemable_mint.decimals)]
+    pub deposit_token_mint: Box<Account<'info, Mint>>,
 
-    #[account(constraint = pool_native.mint == *native_mint.to_account_info().key)]
+    #[account(address = pool_native.mint)]
     pub native_mint: Box<Account<'info, Mint>>,
 
     #[account(mut, constraint = pool_native.owner == *pool_signer.key)]
     pub pool_native: Box<Account<'info, TokenAccount>>,
 
-    #[account(constraint = pool_fiat.owner == *pool_signer.key)]
-    pub pool_fiat: Box<Account<'info, TokenAccount>>,
+    #[account(constraint = pool_deposit_token.owner == *pool_signer.key)]
+    pub pool_deposit_token: Box<Account<'info, TokenAccount>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -126,10 +130,6 @@ pub struct InitializePool<'info> {
     pub creator_native: Box<Account<'info, TokenAccount>>,
 
     pub token_program: Program<'info, Token>,
-
-    pub rent: Sysvar<'info, Rent>,
-
-    pub clock: Sysvar<'info, Clock>,
 
     pub system_program: Program<'info, System>,
 }
@@ -140,10 +140,10 @@ Let’s look at the accounts we added
 -   `pool`: We create the pool account with the init constraint. We add a payer by the name `authority`: which we add later in the account struct. And we also add the space needed to store the account which we already calculated in the `impl` block of `PoolAccount`.
 -   `pool_signer`: This is the authority that will have control of the pool.
 -   `redeemable_mint`: The mint address of the redeemable tokens. We add some constraints to check that the token has the correct configurations set.
--   `fiat_mint`: The mint address of the fiat tokens. We use the constraint that the decimals of the fiat tokens and the redeemable tokens should be the same.
+-   `deposit token_mint`: The mint address of the deposit tokens. We use the constraint that the decimals of the deposit tokens and the redeemable tokens should be the same.
 -   `native_mint`: The mint address of the native token.
 -   `pool_native`: The token account owned by the pool signer that will hold all the native tokens.
--   `pool_fiat`: The token account owned by the pool signer that will hold all the fiat tokens sent by the investor.
+-   `pool_deposit_token`: The token account owned by the pool signer that will hold all the deposit tokens sent by the depositor.
 -   `authority`: The transaction signer
 -   `creator_native`: The token account owned by the project which will send the native tokens to `pool_native`
 
@@ -201,19 +201,16 @@ Now we can move forward with writing the handler function `initialize_pool`
 pub mod ido_program {
     use super::*;
 
-    #[access_control(InitializePool::accounts(&ctx, bump) pre_ido_phase(&ctx, start_ido_ts))]
+    #[access_control(pre_ido_phase(start_ido_ts))]
     pub fn initialize_pool(
         ctx: Context<InitializePool>,
         total_native_tokens: u64,
         start_ido_ts: i64,
         end_ido_ts: i64,
-        withdraw_fiat_ts: i64,
+        withdraw_deposit_token_ts: i64,
         bump: u8,
     ) -> Result<()> {
-
-        if !(start_ido_ts < end_ido_ts
-                && end_ido_ts < withdraw_fiat_ts)
-        {
+        if !(start_ido_ts < end_ido_ts && end_ido_ts < withdraw_deposit_token_ts) {
             return Err(ErrorCode::NonSequentialTimestamps.into());
         }
 
@@ -226,13 +223,13 @@ pub mod ido_program {
         pool.pool_authority = *ctx.accounts.authority.key;
         pool.redeemable_mint = ctx.accounts.redeemable_mint.key();
         pool.native_mint = ctx.accounts.native_mint.key();
-        pool.fiat_mint = ctx.accounts.fiat_mint.key();
+        pool.deposit_token_mint = ctx.accounts.deposit_token_mint.key();
         pool.pool_native = ctx.accounts.pool_native.key();
-        pool.pool_fiat = ctx.accounts.pool_fiat.key();
+        pool.pool_deposit_token = ctx.accounts.pool_deposit_token.key();
         pool.total_native_tokens = total_native_tokens;
         pool.start_ido_ts = start_ido_ts;
         pool.end_ido_ts = end_ido_ts;
-        pool.withdraw_fiat_ts = withdraw_fiat_ts;
+        pool.withdraw_deposit_token_ts = withdraw_deposit_token_ts;
 
         pool.bump = bump;
 
@@ -243,7 +240,7 @@ pub mod ido_program {
             authority: ctx.accounts.authority.to_account_info(),
         };
 
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, total_native_tokens)?;
 
@@ -264,37 +261,9 @@ We create a new `CpiContext` with the token program and the `Transfer` accounts 
 
 And finally, we make a call to `token::transfer()` with the context and the number of tokens specified in the parameters.
 
-The code will not compile yet. This is because the function `pre_ido_phase()` we called under `access_control` and the custom `ErrorCode` s we wrote have not been defined yet. There is also no `accounts()` function under the `InitializePool` implementation block.
+The code will not compile yet. This is because the function `pre_ido_phase()` we called under `access_control` and the custom `ErrorCode`s we wrote have not been defined yet.
 
-Add this after the `InitializePool` account structure.
-
-```rust
-    //--snip--
-	pub clock: Sysvar<'info, Clock>,
-
-    pub system_program: Program<'info, System>,
-}
-
-impl<'info> InitializePool<'info> {
-    fn accounts(ctx: &Context<InitializePool<'info>>, bump: u8) -> Result<()> {
-        let expected_signer = Pubkey::create_program_address(
-            &[ctx.accounts.pool_native.mint.as_ref(), &[bump]],
-            ctx.program_id,
-        )
-        .map_err(|_| ErrorCode::InvalidBump)?;
-        if ctx.accounts.pool_signer.key != &expected_signer {
-            return Err(ErrorCode::InvalidBump.into());
-        }
-        Ok(())
-    }
-}
-
-//--snip--
-```
-
-The `accounts()` function here is checking if the `pool_signer` PDA passed in the accounts structure of `InitializePool` has the correct seeds or not.
-
-And finally, add this at the bottom of the file.
+Add this at the bottom of the file.
 
 ```rust
 //--snip--
@@ -305,8 +274,6 @@ pub enum ErrorCode {
     NonSequentialTimestamps,
     #[msg("Invalid Parameter")]
     InvalidParameter,
-		#[msg("Invalid Bump")]
-    InvalidBump,
     #[msg("IDO has not begun yet")]
     IdoFuture
 }
@@ -315,11 +282,19 @@ pub enum ErrorCode {
 // Access Control Modifiers
 
 // IDO Starts in the Future
-fn pre_ido_phase<'info>(ctx: &Context<InitializePool<'info>>, start_ido_ts: i64) -> Result<()> {
-    if !(ctx.accounts.clock.unix_timestamp < start_ido_ts) {
+fn pre_ido_phase<'info>(start_ido_ts: i64) -> Result<()> {
+    if !(get_timestamp() < start_ido_ts) {
         return Err(ErrorCode::IdoFuture.into());
     }
     Ok(())
+}
+```
+
+And finally we add in the `get_timestamp()` function. Add this after the `pre_ido_phase()` function definition.
+
+```rust
+pub fn get_timestamp() -> UnixTimestamp {
+    Clock::get().unwrap().unix_timestamp
 }
 ```
 
@@ -327,94 +302,93 @@ Inside the `pre_ido_phase` function, we must ensure that the `start_ido_ts` time
 
 Now, run `anchor build`. Now everything will compile correctly, with a warning of unused imports, which we can ignore.
 
-### Exchanging Investor’s Fiat for Redeemable Tokens
+### Exchanging Depositor’s Deposit Token for Redeemable Tokens
 
-Now we can add the instruction that will allow investors to deposit their fiat tokens and receive an equal number of redeemable tokens. We will write the handler function `exchange_fiat_for_redeemable()` and the `ExchangeFiatForRedeemable`
+Now we can add the instruction that will allow depositors to deposit their deposit tokens and receive an equal number of redeemable tokens. We will write the handler function `exchange_deposit_token_for_redeemable()` and the `ExchangeDepositTokenForRedeemable` accounts struct.
 
-Let’s start with `ExchangeFiatForRedeemable`. Add this code after the impl block of `InitializePool`
+Let’s start with `ExchangeDepositTokenForRedeemable`. Add this code after the `InitializePool` accounts struct.
 
 ```rust
 #[derive(Accounts)]
-pub struct ExchangeFiatForRedeemable<'info> {
-    #[account(mut, has_one = redeemable_mint, has_one = pool_fiat)]
+pub struct ExchangeDepositTokenForRedeemable<'info> {
+    #[account(mut, has_one = redeemable_mint, has_one = pool_deposit_token)]
     pub pool: Box<Account<'info, PoolAccount>>,
 
     ///CHECK: This is not dangerous
     #[account(seeds = [pool.native_mint.as_ref()], bump = pool.bump)]
-    pool_signer: AccountInfo<'info>,
+    pub pool_signer: AccountInfo<'info>,
 
     #[account(
         mut,
-        constraint = redeemable_mint.mint_authority == COption::Some(*pool_signer.key)
+        mint::authority = pool_signer
     )]
     pub redeemable_mint: Account<'info, Mint>,
 
-    #[account(mut, constraint = pool_fiat.mint == *fiat_mint.to_account_info().key)]
-    pub fiat_mint: Account<'info, Mint>,
+    #[account(mut, address = pool_deposit_token.mint)]
+    pub deposit_token_mint: Account<'info, Mint>,
 
-    #[account(mut, constraint = pool_fiat.owner == *pool_signer.key)]
-    pub pool_fiat: Account<'info, TokenAccount>,
+    #[account(mut, constraint = pool_deposit_token.owner == *pool_signer.key)]
+    pub pool_deposit_token: Account<'info, TokenAccount>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    #[account(mut, constraint = investor_fiat.owner == *authority.key)]
-    pub investor_fiat: Account<'info, TokenAccount>,
+    #[account(mut, constraint = depositor_deposit_token.owner == *authority.key)]
+    pub depositor_deposit_token: Account<'info, TokenAccount>,
 
-    #[account(mut, constraint = investor_redeemable.owner == *authority.key)]
-    pub investor_redeemable: Account<'info, TokenAccount>,
+    #[account(mut, constraint = depositor_redeemable.owner == *authority.key)]
+    pub depositor_redeemable: Account<'info, TokenAccount>,
 
-    #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
-
-    pub clock: Sysvar<'info, Clock>,
 }
 ```
 
-We need the redeemable and fiat token mint accounts. This is because we need to know which tokens we will be dealing with in this instruction.
+We need the redeemable and deposit_token mint accounts. This is because we need to know which tokens we will be dealing with in this instruction.
 
-We also need the fiat `TokenAccount`s owned by the pool_signer and the investor. This is because we need to know from which account to which account tokens need to be transferred. In this case, fiat tokens will be transferred from the investor’s fiat `TokenAccount` to pool_signer’s fiat `TokenAccount`.
+We also need the deposit_token `TokenAccount`s owned by the pool_signer and the depositor. This is because we need to know from which account to which account tokens need to be transferred. In this case, deposit tokens will be transferred from the depositor’s `TokenAccount` to pool_signer’s `TokenAccount`.
 
-And finally, we need to know the investor’s redeemable `TokenAccount` to be able to mint redeemable token accounts to the investor.
+And finally, we need to know the depositor’s redeemable `TokenAccount` to be able to mint redeemable token accounts to the depositor.
 
 Let’s add the handler function. Add this after the `initialize_pool` function
 
 ```rust
-#[access_control(unrestricted_phase(&ctx))]
-    pub fn exchange_fiat_for_redeemable(
-        ctx: Context<ExchangeFiatForRedeemable>,
+    // --snip--
+
+    #[access_control(unrestricted_phase(&ctx))]
+    pub fn exchange_deposit_token_for_redeemable(
+        ctx: Context<ExchangeDepositTokenForRedeemable>,
         amount: u64,
     ) -> Result<()> {
         if amount == 0 {
             return Err(ErrorCode::InvalidParameter.into());
         }
         // While token::transfer will check this, we prefer a verbose error msg
-        if ctx.accounts.investor_fiat.amount < amount {
-            return Err(ErrorCode::LowFiat.into());
+        if ctx.accounts.depositor_deposit_token.amount < amount {
+            return Err(ErrorCode::LowDepositToken.into());
         }
 
-        // Transfer investor's fiat to pool fiat account.
+        // Transfer depositor's deposit_token to pool deposit_token account.
         let cpi_accounts = Transfer {
-            from: ctx.accounts.investor_fiat.to_account_info(),
-            to: ctx.accounts.pool_fiat.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info().clone(),
+            from: ctx.accounts.depositor_deposit_token.to_account_info(),
+            to: ctx.accounts.pool_deposit_token.to_account_info(),
+            authority: ctx.accounts.authority.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, amount)?;
 
-        // Mint Redeemable to investor Redeemable account.
+        // Mint Redeemable to depositor Redeemable account.
         let seeds = &[
-        ctx.accounts.pool.native_mint.as_ref(),
-        &[ctx.accounts.pool.bump],
+            ctx.accounts.pool.native_mint.as_ref(),
+            &[ctx.accounts.pool.bump],
         ];
         let signer = &[&seeds[..]];
         let cpi_accounts = MintTo {
             mint: ctx.accounts.redeemable_mint.to_account_info(),
-            to: ctx.accounts.investor_redeemable.to_account_info(),
+            to: ctx.accounts.depositor_redeemable.to_account_info(),
             authority: ctx.accounts.pool_signer.clone(),
         };
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
         token::mint_to(cpi_ctx, amount)?;
 
@@ -422,29 +396,29 @@ Let’s add the handler function. Add this after the `initialize_pool` function
     }
 ```
 
-The handler function takes two parameters, the context, and the amount of fiat tokens to be sent.
+The handler function takes two parameters, the context, and the amount of deposit tokens to be sent.
 
 The first thing we do is check if the amount given as the parameter is 0 or not, and throw an error if it is.
 
-Then we check if the investor’s fiat TokenAccount has a lesser amount of tokens than the amount specified. Although the `token::transfer` call already checks it, we want a verbose error message.
+Then we check if the depositor’s deposit tokenAccount has a lesser amount of tokens than the amount specified. Although the `token::transfer` call already checks it, we want a verbose error message.
 
-We create a new context with a `Transfer` object where we declare that tokens will be sent from the investor’s fiat TokenAccount to the pool’s fiat TokenAccount.
+We create a new context with a `Transfer` object where we declare that tokens will be sent from the depositor’s deposit token account to the pool’s deposit token account.
 
 We create a new `CpiContext` with the token program and the accounts context.
 
-We then invoke `token::transfer` to transfer `amount` number of fiat tokens
+We then invoke `token::transfer` to transfer `amount` number of deposit tokens.
 
-Now we need a mechanism to track which investor deposited how much to the pool, since we don’t store the data anywhere. The easiest way to do that is to send an equal number of tokens to the investor which they can use to redeem the native tokens once the IDO is over (Hence the name redeemable tokens). The authority to mint these tokens rests with the `pool_signer` which we check in `redeemable_mint`'s constraint in the accounts struct. These tokens don’t hold any value, and exactly the same number of redeemable tokens will be minted as the number of fiat tokens sent to the pool.
+Now we need a mechanism to track which depositor deposited how much to the pool, since we don’t store the data anywhere. The easiest way to do that is to send an equal number of tokens to the depositor which they can use to redeem the native tokens once the IDO is over (Hence the name redeemable tokens). The authority to mint these tokens rests with the `pool_signer` which we check in `redeemable_mint`'s constraint in the accounts struct. These tokens don’t hold any value, and exactly the same number of redeemable tokens will be minted as the number of deposit tokens sent to the pool.
 
 Now, since a PDA needs to sign a transaction to mint redeemable tokens, we have to invoke `CpiContext::new_with_signer()` instead of `CpiContext::new()`. And to get the signer, we need to construct the PDA seeds.
 
 We construct the seeds with the `native_mint` address and bump we already store in the pool account to get the signer.
 
-A `MintTo` context is created. Here we need to tell the program the mint account of the tokens that will be minted, the investor’s token account to where the redeemable tokens will be sent, and the authority of the transaction which is the `pool_signer`.
+A `MintTo` context is created. Here we need to tell the program the mint account of the tokens that will be minted, the depositor’s token account to where the redeemable tokens will be sent, and the authority of the transaction which is the `pool_signer`.
 
 We invoke `CpiContext::new_with_signer()` with the token program, the accounts context and the signer which we constructed.
 
-Finally, we call `token::mint_to` to send an equal number of redeemable tokens to the investor’s token account as the number of fiat tokens sent to the pool.
+Finally, we call `token::mint_to` to send an equal number of redeemable tokens to the depositor’s token account as the number of deposit tokens sent to the pool.
 
 As a final step, add the errors and access control function, and build the program.
 
@@ -455,33 +429,31 @@ pub enum ErrorCode {
     NonSequentialTimestamps,
     #[msg("Invalid Parameter")]
     InvalidParameter,
-	#[msg("Invalid Bump")]
-    InvalidBump,
     #[msg("IDO has not begun yet")]
     IdoFuture,
 	#[msg("Not the correct time to invest")]
     WrongInvestingTime,
-    #[msg("Insufficient Fiat Tokens")]
-    LowFiat
+    #[msg("Insufficient deposit tokens")]
+    LowDepositToken
 }
 
 // Access Control Modifiers
 
 // IDO Starts in the Future
-fn pre_ido_phase<'info>(ctx: &Context<InitializePool<'info>>, start_ido_ts: i64) -> Result<()> {
-    if !(ctx.accounts.clock.unix_timestamp < start_ido_ts) {
+fn pre_ido_phase<'info>(start_ido_ts: i64) -> Result<()> {
+    if !(get_timestamp() < start_ido_ts) {
         return Err(ErrorCode::IdoFuture.into());
     }
     Ok(())
 }
 
 // Unrestricted Phase
-fn unrestricted_phase<'info>(ctx: &Context<ExchangeFiatForRedeemable<'info>>) -> Result<()> {
-    if !(
-            ctx.accounts.pool.start_ido_ts < ctx.accounts.clock.unix_timestamp
-            &&
-            ctx.accounts.pool.end_ido_ts > ctx.accounts.clock.unix_timestamp
-        ) {
+fn unrestricted_phase<'info>(
+    ctx: &Context<ExchangeDepositTokenForRedeemable<'info>>,
+) -> Result<()> {
+    if !(ctx.accounts.pool.start_ido_ts < get_timestamp()
+        && ctx.accounts.pool.end_ido_ts > get_timestamp())
+    {
         return Err(ErrorCode::WrongInvestingTime.into());
     }
     Ok(())
@@ -492,7 +464,7 @@ The access control function `unrestricted_phase` ensures that deposits are limit
 
 Run `anchor build`
 
-### Exchanging Investor’s Redeemable Tokens for Native Tokens
+### Exchanging depositor’s Redeemable Tokens for Native Tokens
 
 The instruction and handler function for this will look very similar to just the previous one.
 Let’s look at `ExchangeRedeemableForNative`.
@@ -505,11 +477,11 @@ pub struct ExchangeRedeemableForNative<'info> {
 
     /// CHECK: This is not dangerous
     #[account(seeds = [pool.native_mint.as_ref()], bump = pool.bump)]
-    pool_signer: AccountInfo<'info>,
+    pub pool_signer: AccountInfo<'info>,
 
     #[account(
         mut,
-        constraint = redeemable_mint.mint_authority == COption::Some(*pool_signer.key)
+        mint::authority = pool_signer
     )]
     pub redeemable_mint: Account<'info, Mint>,
 
@@ -519,16 +491,13 @@ pub struct ExchangeRedeemableForNative<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    #[account(mut, constraint = investor_native.owner == *authority.key)]
-    pub investor_native: Account<'info, TokenAccount>,
+    #[account(mut, constraint = depositor_native.owner == *authority.key)]
+    pub depositor_native: Account<'info, TokenAccount>,
 
-    #[account(mut, constraint = investor_redeemable.owner == *authority.key)]
-    pub investor_redeemable: Account<'info, TokenAccount>,
+    #[account(mut, constraint = depositor_redeemable.owner == *authority.key)]
+    pub depositor_redeemable: Account<'info, TokenAccount>,
 
-    #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
-
-    pub clock: Sysvar<'info, Clock>,
 }
 ```
 
@@ -537,27 +506,26 @@ This is the same as the previous instruction, the only difference being we are d
 We can move on to the `exchange_redeemable_for_native` handler function.
 
 ```rust
-#[access_control(ido_over(&ctx.accounts.pool, &ctx.accounts.clock))]
-    pub fn exchange_redeemable_for_native(
-        ctx: Context<ExchangeRedeemableForNative>,
-    ) -> Result<()> {
-        let native_amount = (ctx.accounts.investor_redeemable.amount as u128)
-        .checked_mul(ctx.accounts.pool_native.amount as u128)
-        .unwrap()
-        .checked_div(ctx.accounts.redeemable_mint.supply as u128)
-        .unwrap();
+    // --snip--
+
+    #[access_control(ido_over(&ctx.accounts.pool))]
+    pub fn exchange_redeemable_for_native(ctx: Context<ExchangeRedeemableForNative>) -> Result<()> {
+        let native_amount = (ctx.accounts.depositor_redeemable.amount as u128)
+            .checked_mul(ctx.accounts.pool_native.amount as u128)
+            .unwrap()
+            .checked_div(ctx.accounts.redeemable_mint.supply as u128)
+            .unwrap();
 
         let cpi_accounts = Burn {
             mint: ctx.accounts.redeemable_mint.to_account_info(),
-            from: ctx.accounts.investor_redeemable.to_account_info(),
+            from: ctx.accounts.depositor_redeemable.to_account_info(),
             authority: ctx.accounts.authority.to_account_info(),
         };
 
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
-        token::burn(cpi_ctx, ctx.accounts.investor_redeemable.amount)?;
-
+        token::burn(cpi_ctx, ctx.accounts.depositor_redeemable.amount)?;
 
         let seeds = &[
             ctx.accounts.pool.native_mint.as_ref(),
@@ -567,11 +535,11 @@ We can move on to the `exchange_redeemable_for_native` handler function.
 
         let cpi_accounts = Transfer {
             from: ctx.accounts.pool_native.to_account_info(),
-            to: ctx.accounts.investor_native.to_account_info(),
+            to: ctx.accounts.depositor_native.to_account_info(),
             authority: ctx.accounts.pool_signer.to_account_info(),
         };
 
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
 
         token::transfer(cpi_ctx, native_amount as u64)?;
@@ -582,25 +550,22 @@ We can move on to the `exchange_redeemable_for_native` handler function.
 
 Here we go through a few new steps.
 
-The first step is to calculate how much native tokens the investor will be receiving. The simple formula is
+The first step is to calculate how much native tokens the depositor will be receiving. The simple formula is
 
-(Amount of Redeemable Tokens with Investor \* Amount of Native Tokens in Pool) / Supply of Redeemable Tokens
+(Amount of Redeemable Tokens with depositor \* Amount of Native Tokens in Pool) / Supply of Redeemable Tokens
 
-The next step is to `Burn` the investor’s redeemable tokens. We create a `Burn` instance where we declare the redeemable token mint, investor’s token account from where the tokens will be burned and the authority.
+The next step is to `Burn` the depositor’s redeemable tokens. We create a `Burn` instance where we declare the redeemable token mint, depositor’s token account from where the tokens will be burned and the authority.
 
 We create a new `CpiContext` with the token program and invoke `token::burn()`.
 
-We then move on to calculate the seeds of the pool_signer and create a `Transfer` instance. Finally, we transfer the calculated amount of native tokens from `pool_native` to `investor_native`.
+We then move on to calculate the seeds of the pool_signer and create a `Transfer` instance. Finally, we transfer the calculated amount of native tokens from `pool_native` to `depositor_native`.
 
 We are not done yet, the final thing left to do is write the access control function `ido_over()`
 
 ```rust
 //iDO Over
-fn ido_over<'info>(
-    pool_account: &Account<'info, PoolAccount>,
-    clock: &Sysvar<'info, Clock>,
-) -> Result<()> {
-    if !(pool_account.end_ido_ts < clock.unix_timestamp) {
+fn ido_over<'info>(pool_account: &Account<'info, PoolAccount>) -> Result<()> {
+    if !(pool_account.end_ido_ts < get_timestamp()) {
         return Err(ErrorCode::IdoNotOver.into());
     }
     Ok(())
@@ -618,14 +583,12 @@ pub enum ErrorCode {
     NonSequentialTimestamps,
     #[msg("Invalid Parameter")]
     InvalidParameter,
-    #[msg("Invalid Bump")]
-    InvalidBump,
     #[msg("IDO has not begun yet")]
     IdoFuture,
     #[msg("Not the correct time to invest")]
     WrongInvestingTime,
-    #[msg("Insufficient Fiat Tokens")]
-    LowFiat,
+    #[msg("Insufficient deposit tokens")]
+    LowDepositToken,
     #[msg("IDO has not ended yet")]
     IdoNotOver
 }
@@ -633,75 +596,72 @@ pub enum ErrorCode {
 
 Run `anchor build`. You will see now that the warnings have disappeared.
 
-### Withdrawing Fiat Tokens From the Pool
+### Withdrawing Deposit Tokens From the Pool
 
 Now the final piece of the program that’s left is allowing the project to withdraw funds from the pool. Add this in the accounts struct
 
 ```rust
 #[derive(Accounts)]
-pub struct WithdrawPoolFiat<'info> {
-    #[account(has_one = pool_fiat)]
+pub struct WithdrawPoolDepositToken<'info> {
+    #[account(has_one = pool_deposit_token)]
     pub pool: Box<Account<'info, PoolAccount>>,
 
     ///CHECK: This is not dangerous
     #[account(seeds = [pool.native_mint.as_ref()], bump = pool.bump)]
     pub pool_signer: AccountInfo<'info>,
 
-    #[account(mut, constraint = pool_fiat.mint == *fiat_mint.to_account_info().key)]
-    pub fiat_mint: Account<'info, Mint>,
+    #[account(address = pool_deposit_token.mint)]
+    pub deposit_token_mint: Account<'info, Mint>,
 
-    #[account(mut, constraint = pool_fiat.owner == *pool_signer.key)]
-    pub pool_fiat: Account<'info, TokenAccount>,
+    #[account(mut, constraint = pool_deposit_token.owner == *pool_signer.key)]
+    pub pool_deposit_token: Account<'info, TokenAccount>,
 
     #[account(mut)]
     pub payer: Signer<'info>,
 
     #[account(mut)]
-    pub creator_fiat: Account<'info, TokenAccount>,
+    pub creator_deposit_token: Account<'info, TokenAccount>,
 
-    #[account(constraint = token_program.key == &token::ID)]
     pub token_program: Program<'info, Token>,
-
-    pub clock: Sysvar<'info, Clock>,
 }
 ```
 
-Here we need the project authority to sign the transaction to withdraw the pool fiat tokens.
+Here we need the project authority to sign the transaction to withdraw the pool deposit tokens.
 
-Add in the handler function `withdraw_pool_fiat`
+Add in the handler function `withdraw_pool_deposit_token`
 
 ```rust
-#[access_control(can_withdraw_fiat(&ctx.accounts.pool, &ctx.accounts.clock))]
-    pub fn withdraw_pool_fiat(ctx: Context<WithdrawPoolFiat>) -> Result<()> {
+    // --snip--
+
+    #[access_control(can_withdraw_deposit_token(&ctx.accounts.pool))]
+    pub fn withdraw_pool_deposit_token(ctx: Context<WithdrawPoolDepositToken>) -> Result<()> {
         let seeds = &[
             ctx.accounts.pool.native_mint.as_ref(),
             &[ctx.accounts.pool.bump],
         ];
         let signer = &[&seeds[..]];
         let cpi_accounts = Transfer {
-            from: ctx.accounts.pool_fiat.to_account_info(),
-            to: ctx.accounts.creator_fiat.to_account_info(),
+            from: ctx.accounts.pool_deposit_token.to_account_info(),
+            to: ctx.accounts.creator_deposit_token.to_account_info(),
             authority: ctx.accounts.pool_signer.to_account_info(),
         };
-        let cpi_program = ctx.accounts.token_program.to_account_info().clone();
+        let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-        token::transfer(cpi_ctx, ctx.accounts.pool_fiat.amount)?;
+        token::transfer(cpi_ctx, ctx.accounts.pool_deposit_token.amount)?;
 
         Ok(())
     }
+}
 ```
 
-Again, here we do a similar thing. Calculate the signer seeds of pool_signer, Create a new `CpiContext` with the signer and invoke `token::transfer()` to transfer all fiat tokens from the pool to the project’s fiat `TokenAccount`
+Again, here we do a similar thing. Calculate the signer seeds of pool_signer, Create a new `CpiContext` with the signer and invoke `token::transfer()` to transfer all deposit tokens from the pool to the project’s deposit `TokenAccount`
 
 Add the access control function
 
 ```rust
-//Can Withdraw fiat
-fn can_withdraw_fiat<'info>(
-    pool_account: &Account<'info, PoolAccount>,
-    clock: &Sysvar<'info, Clock>,
-) -> Result<()> {
-    if !(pool_account.withdraw_fiat_ts < clock.unix_timestamp) {
+//Can Withdraw deposit_token
+fn can_withdraw_deposit_token<'info>(pool_account: &Account<'info, PoolAccount>) -> Result<()> {
+    if !(pool_account.withdraw_deposit_token_ts < get_timestamp()) {
         return Err(ErrorCode::CannotWithdrawYet.into());
     }
     Ok(())
@@ -717,17 +677,15 @@ pub enum ErrorCode {
     NonSequentialTimestamps,
     #[msg("Invalid Parameter")]
     InvalidParameter,
-    #[msg("Invalid Bump")]
-    InvalidBump,
     #[msg("IDO has not begun yet")]
     IdoFuture,
     #[msg("Not the correct time to invest")]
     WrongInvestingTime,
-    #[msg("Insufficient Fiat Tokens")]
-    LowFiat,
+    #[msg("Insufficient deposit tokens")]
+    Lowdeposit token,
     #[msg("IDO has not ended yet")]
     IdoNotOver,
-    #[msg("Cannot withdraw Fiat yet")]
+    #[msg("Cannot withdraw deposit token yet")]
     CannotWithdrawYet
 }
 ```
@@ -803,32 +761,32 @@ describe("ido-program", () => {
 
     let nativeTokenAmount = new anchor.BN(1000000);
 
-    let fiatMint: PublicKey;
+    let depositTokenMint: PublicKey;
     let redeemableMint: PublicKey;
     let nativeMint: PublicKey;
 
-    let projectFiat: PublicKey;
-    let projectNative: PublicKey;
+    let projectDepositAccount: PublicKey;
+    let projectNativeAccount: PublicKey;
 
-    let investorFiat: PublicKey;
-    let investorNative: PublicKey;
-    let investorRedeemable: PublicKey;
+    let depositorDepositAccount: PublicKey;
+    let depositorNativeAccount: PublicKey;
+    let depositorRedeemable: PublicKey;
 
     let poolNative: PublicKey;
-    let poolFiat: PublicKey;
+    let poolDepositToken: PublicKey;
 
     let poolSigner: PublicKey;
 
     let nowBn: anchor.BN;
     let startIdoTs: anchor.BN;
     let endIdoTs: anchor.BN;
-    let withDrawFiatTs: anchor.BN;
+    let withDrawDepositTokenTs: anchor.BN;
 
     const payer = anchor.web3.Keypair.generate();
     const mintAuthority = anchor.web3.Keypair.generate();
 
     const project = anchor.web3.Keypair.generate();
-    const investor = anchor.web3.Keypair.generate();
+    const depositor = anchor.web3.Keypair.generate();
 
     let pool = anchor.web3.Keypair.generate();
 });
@@ -841,7 +799,7 @@ Now let’s write the first test
 ```ts
 	//--snip--
 
-	it("Can initialize the program state", async () => {
+    it("Can initialize the program state", async () => {
         const transferSig = await provider.connection.requestAirdrop(
             payer.publicKey,
             10000000000
@@ -870,80 +828,62 @@ Now let’s write the first test
             }),
             SystemProgram.transfer({
                 fromPubkey: payer.publicKey,
-                toPubkey: investor.publicKey,
+                toPubkey: depositor.publicKey,
                 lamports: 2000000000,
             })
         );
 
         await provider.sendAndConfirm(tx, [payer]);
 
-        fiatMint = await createMint(
+        depositTokenMint = await createMint(
             provider.connection,
             payer,
             mintAuthority.publicKey,
-            undefined,
-            0,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            null,
+            0
         );
 
         nativeMint = await createMint(
             provider.connection,
             payer,
             mintAuthority.publicKey,
-            undefined,
-            0,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            null,
+            0
         );
 
-        projectFiat = await createAccount(
+        projectDepositAccount = await createAccount(
             provider.connection,
             payer,
-            fiatMint,
-            project.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            depositTokenMint,
+            project.publicKey
         );
 
-        projectNative = await createAccount(
+        projectNativeAccount = await createAccount(
             provider.connection,
             payer,
             nativeMint,
-            project.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            project.publicKey
         );
 
-        investorFiat = await createAccount(
+        depositorDepositAccount = await createAccount(
             provider.connection,
             payer,
-            fiatMint,
-            investor.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            depositTokenMint,
+            depositor.publicKey
         );
 
-        investorNative = await createAccount(
+        depositorNativeAccount = await createAccount(
             provider.connection,
             payer,
             nativeMint,
-            investor.publicKey,
-            undefined,
-            undefined,
-            TOKEN_PROGRAM_ID
+            depositor.publicKey
         );
 
         await mintTo(
             provider.connection,
             payer,
             nativeMint,
-            projectNative,
+            projectNativeAccount,
             mintAuthority,
             nativeTokenAmount.toNumber()
         );
@@ -951,32 +891,32 @@ Now let’s write the first test
         await mintTo(
             provider.connection,
             payer,
-            fiatMint,
-            investorFiat,
+            depositTokenMint,
+            depositorDepositAccount,
             mintAuthority,
             10000
         );
 
-        const projectNativeTokenAccount = await getAccount(
+        const projectNativeAccountTokenAccount = await getAccount(
             provider.connection,
-            projectNative
+            projectNativeAccount
         );
 
         assert.strictEqual(
-            projectNativeTokenAccount.amount.toString(),
+            projectNativeAccountTokenAccount.amount.toString(),
             nativeTokenAmount.toNumber().toString()
         );
     });
 })
 ```
 
-The first thing we did was request 10 SOL to the `payer` account. Then we transfer 2 SOL each to `mintAuthority`, `project` and `investor` accounts so that they can pay rent and gas fees.
+The first thing we did was request 10 SOL to the `payer` account. Then we transfer 2 SOL each to `mintAuthority`, `project` and `depositor` accounts so that they can pay rent and gas fees.
 
-Then we create dummy `fiatMint` and `nativeMint` accounts for testing purposes.
+Then we create dummy `deposit tokenMint` and `nativeMint` accounts for testing purposes.
 
-We create `TokenAccount`s for these mints owned by the `project` and the `investor`.
+We create `TokenAccount`s for these mints owned by the `project` and the `depositor`.
 
-Finally we mint native tokens to the `project` and fiat tokens to the `investor`.
+Finally we mint native tokens to the `project` and deposit tokens to the `depositor`.
 
 Run `anchor test`. It should show 1 test passed.
 
@@ -1007,11 +947,11 @@ Now we are ready to test out our instructions.
             TOKEN_PROGRAM_ID
         );
 
-        investorRedeemable = await createAccount(
+        depositorRedeemable = await createAccount(
             provider.connection,
             payer,
             redeemableMint,
-            investor.publicKey,
+            depositor.publicKey,
             undefined,
             undefined,
             TOKEN_PROGRAM_ID
@@ -1031,10 +971,10 @@ Now we are ready to test out our instructions.
 
         poolNative = poolNativeAccount.address;
 
-        let poolFiatAccount = await getOrCreateAssociatedTokenAccount(
+        let pooldeposit tokenAccount = await getOrCreateAssociatedTokenAccount(
             provider.connection,
             payer,
-            fiatMint,
+            deposit tokenMint,
             poolSigner,
             true,
             undefined,
@@ -1043,29 +983,29 @@ Now we are ready to test out our instructions.
             undefined
         );
 
-        poolFiat = poolFiatAccount.address;
+        pooldeposit token = pooldeposit tokenAccount.address;
 
         nowBn = new anchor.BN(Date.now() / 1000);
         startIdoTs = nowBn.add(new anchor.BN(10));
         endIdoTs = nowBn.add(new anchor.BN(20));
-        withDrawFiatTs = nowBn.add(new anchor.BN(30));
+        withDrawdeposit tokenTs = nowBn.add(new anchor.BN(30));
 
         await program.methods
             .initializePool(
                 nativeTokenAmount,
                 startIdoTs,
                 endIdoTs,
-                withDrawFiatTs,
+                withDrawdeposit tokenTs,
                 bump
             )
             .accounts({
                 pool: pool.publicKey,
                 poolSigner: poolSigner,
                 redeemableMint: redeemableMint,
-                fiatMint: fiatMint,
+                deposit tokenMint: deposit tokenMint,
                 nativeMint: nativeMint,
                 poolNative: poolNative,
-                poolFiat: poolFiat,
+                pooldeposit token: pooldeposit token,
                 authority: project.publicKey,
                 creatorNative: projectNative,
                 tokenProgram: TOKEN_PROGRAM_ID,
@@ -1107,8 +1047,8 @@ Now we are ready to test out our instructions.
             nativeMint.toBase58()
         );
         assert.strictEqual(
-            createdPool.poolFiat.toBase58(),
-            poolFiat.toBase58()
+            createdPool.pooldeposit token.toBase58(),
+            pooldeposit token.toBase58()
         );
         assert.strictEqual(
             createdPool.totalNativeTokens.toNumber().toString(),
@@ -1123,80 +1063,79 @@ Now we are ready to test out our instructions.
             endIdoTs.toString()
         );
         assert.strictEqual(
-            createdPool.withdrawFiatTs.toNumber().toString(),
-            withDrawFiatTs.toString()
+            createdPool.withdrawdeposit tokenTs.toNumber().toString(),
+            withDrawdeposit tokenTs.toString()
         );
     });
 })
 ```
 
-First we derive the seeds using nativeMint to get the poolSigner PDA. Then we create the redeemable token mint account and the necessary token accounts owned by poolSIgner by calling `getOrCreateAssociatedTokenAccount()`. Then we set the different timestamps which we need in the program and call the `program.methods.initializePool()` method. We pass in all the accounts we defined in the accounts struct of our program and the signers, which are `pool` and `project`.
+First we derive the seeds using nativeMint to get the poolSigner PDA. Then we create the redeemable token mint account and the necessary token accounts owned by poolSigner by calling `getOrCreateAssociatedTokenAccount()`. Then we set the different timestamps which we need in the program and call the `program.methods.initializePool()` method. We pass in all the accounts we defined in the accounts struct of our program and the signers, which are `pool` and `project`.
 
 Run `anchor test`. It should show 2 tests passed.
 
-### Exchange Investor Fiat for Redeemable Tokens
+### Exchange depositor deposit token for Redeemable Tokens
 
 ```ts
 	//--snip--
 
 	let deposit = 5000;
 
-    it("Can exchange investor Fiat for redeemable tokens", async () => {
+    it("Can exchange depositor Deposit tokens for Redeemable tokens", async () => {
         if (Date.now() < startIdoTs.toNumber() * 1000) {
             await sleep(startIdoTs.toNumber() * 1000 - Date.now() + 5000);
         }
 
         await program.methods
-            .exchangeFiatForRedeemable(new anchor.BN(deposit))
+            .exchangeDepositTokenForRedeemable(new anchor.BN(firstDeposit))
             .accounts({
                 pool: pool.publicKey,
                 poolSigner: poolSigner,
                 redeemableMint: redeemableMint,
-                fiatMint: fiatMint,
-                poolFiat: poolFiat,
-                authority: investor.publicKey,
-                investorFiat: investorFiat,
-                investorRedeemable: investorRedeemable,
+                depositTokenMint: depositTokenMint,
+                poolDepositToken: poolDepositToken,
+                authority: depositor.publicKey,
+                depositorDepositToken: depositorDepositAccount,
+                depositorRedeemable: depositorRedeemable,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
             })
-            .signers([investor])
+            .signers([depositor])
             .rpc();
 
-        const poolFiatTokenAccount = await getAccount(
+        const poolDepositTokenTokenAccount = await getAccount(
             provider.connection,
-            poolFiat
+            poolDepositToken
         );
 
         assert.strictEqual(
-            poolFiatTokenAccount.amount.toString(),
-            deposit.toString()
+            poolDepositTokenTokenAccount.amount.toString(),
+            firstDeposit.toString()
         );
 
-        const investorFiatTokenAccount = await getAccount(
+        const depositorDepositAccountTokenAccount = await getAccount(
             provider.connection,
-            investorFiat
+            depositorDepositAccount
         );
 
-        const investorRedeemableTokenAccount = await getAccount(
+        const depositorRedeemableTokenAccount = await getAccount(
             provider.connection,
-            investorRedeemable
+            depositorRedeemable
         );
 
         assert.strictEqual(
-            investorFiatTokenAccount.amount.toString(),
-            (10000 - deposit).toString()
+            depositorDepositAccountTokenAccount.amount.toString(),
+            (10000 - firstDeposit).toString()
         );
 
         assert.strictEqual(
-            investorRedeemableTokenAccount.amount.toString(),
-            deposit.toString()
+            depositorRedeemableTokenAccount.amount.toString(),
+            firstDeposit.toString()
         );
     });
 })
 ```
 
-We check for the current time and `sleep` before it is time to call the `exchangeFiatForRedeemable` method. We cannot call the method outside the stipulated time because of the access controls we added. If we try to call it outside the correct time, it will error out.
+We check for the current time and `sleep` before it is time to call the `exchangeDepositTokenForRedeemable` method. We cannot call the method outside the stipulated time because of the access controls we added. If we try to call it outside the correct time, it will error out.
 
 But we have not added the `sleep` function yet. Add it at the end outside the `describe` block.
 
@@ -1207,7 +1146,7 @@ function sleep(ms: number) {
 }
 ```
 
-Inside the test, we call the `exchangeFiatForRedeemable` program method, and then write the usual assert checks.
+Inside the test, we call the `exchangeDepositTokenForRedeemable` program method, and then write the usual assert checks.
 
 Running `anchor test` should now show 3 tests passed.
 
@@ -1215,7 +1154,7 @@ Running `anchor test` should now show 3 tests passed.
 
 ```ts
 	//--snip--
-	it("Can exchange investor Redeemable tokens for Native tokens", async () => {
+    it("Can exchange depositor Redeemable tokens for Native tokens", async () => {
         if (Date.now() < endIdoTs.toNumber() * 1000) {
             await sleep(endIdoTs.toNumber() * 1000 - Date.now() + 5000);
         }
@@ -1227,13 +1166,12 @@ Running `anchor test` should now show 3 tests passed.
                 poolSigner: poolSigner,
                 redeemableMint: redeemableMint,
                 poolNative: poolNative,
-                authority: investor.publicKey,
-                investorNative: investorNative,
-                investorRedeemable: investorRedeemable,
+                authority: depositor.publicKey,
+                depositorNative: depositorNativeAccount,
+                depositorRedeemable: depositorRedeemable,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
             })
-            .signers([investor])
+            .signers([depositor])
             .rpc();
 
         const poolNativeTokenAccount = await getAccount(
@@ -1243,23 +1181,23 @@ Running `anchor test` should now show 3 tests passed.
 
         assert.strictEqual(poolNativeTokenAccount.amount.toString(), "0");
 
-        const investorNativeTokenAccount = await getAccount(
+        const depositorNativeAccountTokenAccount = await getAccount(
             provider.connection,
-            investorNative
+            depositorNativeAccount
         );
 
-        const investorRedeemableTokenAccount = await getAccount(
+        const depositorRedeemableTokenAccount = await getAccount(
             provider.connection,
-            investorRedeemable
+            depositorRedeemable
         );
 
         assert.strictEqual(
-            investorNativeTokenAccount.amount.toString(),
+            depositorNativeAccountTokenAccount.amount.toString(),
             nativeTokenAmount.toString()
         );
 
         assert.strictEqual(
-            investorRedeemableTokenAccount.amount.toString(),
+            depositorRedeemableTokenAccount.amount.toString(),
             "0"
         );
     });
@@ -1270,50 +1208,49 @@ Here also, we go through similar steps like the previous one.
 
 `anchor test` should now show 4 tests passed.
 
-### Withdraw Pool Fiat Tokens
+### Withdraw Pool deposit tokens
 
 ```ts
-	it("Can withdraw total Fiat from pool account", async () => {
-        if (Date.now() < withDrawFiatTs.toNumber() * 1000) {
-            await sleep(withDrawFiatTs.toNumber() * 1000 - Date.now() + 5000);
+    it("Can withdraw total deposit tokens from pool account", async () => {
+        if (Date.now() < withDrawDepositTokenTs.toNumber() * 1000) {
+            await sleep(withDrawDepositTokenTs.toNumber() * 1000 - Date.now() + 5000);
         }
 
         await program.methods
-            .withdrawPoolFiat()
+            .withdrawPoolDepositToken()
             .accounts({
                 pool: pool.publicKey,
                 poolSigner: poolSigner,
-                fiatMint: fiatMint,
-                poolFiat: poolFiat,
+                depositTokenMint: depositTokenMint,
+                poolDepositToken: poolDepositToken,
                 payer: project.publicKey,
-                creatorFiat: projectFiat,
+                creatorDepositToken: projectDepositAccount,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
             })
             .signers([project])
             .rpc();
 
-        const poolFiatTokenAccount = await getAccount(
+        const poolDepositTokenTokenAccount = await getAccount(
             provider.connection,
-            poolFiat
+            poolDepositToken
         );
 
-        assert.strictEqual(poolFiatTokenAccount.amount.toString(), "0");
+        assert.strictEqual(poolDepositTokenTokenAccount.amount.toString(), "0");
 
-        const projectFiatTokenAccount = await getAccount(
+        const projectDepositAccountTokenAccount = await getAccount(
             provider.connection,
-            projectFiat
+            projectDepositAccount
         );
 
         assert.strictEqual(
-            projectFiatTokenAccount.amount.toString(),
-            deposit.toString()
+            projectDepositAccountTokenAccount.amount.toString(),
+            firstDeposit.toString()
         );
     });
-});
+})
 ```
 
-Finally we test the `withdrawPoolFiat` program method, and that concludes all our tests.
+Finally we test the `withdrawPoolDepositToken` program method, and that concludes all our tests.
 
 `anchor test` should now be showing 5 tests passed.
 
