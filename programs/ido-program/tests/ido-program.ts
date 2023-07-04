@@ -21,32 +21,32 @@ describe("ido-program", () => {
 
     let nativeTokenAmount = new anchor.BN(1000000);
 
-    let fiatMint: PublicKey;
+    let depositTokenMint: PublicKey;
     let redeemableMint: PublicKey;
     let nativeMint: PublicKey;
 
-    let projectFiat: PublicKey;
-    let projectNative: PublicKey;
+    let projectDepositAccount: PublicKey;
+    let projectNativeAccount: PublicKey;
 
-    let investorFiat: PublicKey;
-    let investorNative: PublicKey;
-    let investorRedeemable: PublicKey;
+    let depositorDepositAccount: PublicKey;
+    let depositorNativeAccount: PublicKey;
+    let depositorRedeemable: PublicKey;
 
     let poolNative: PublicKey;
-    let poolFiat: PublicKey;
+    let poolDepositToken: PublicKey;
 
     let poolSigner: PublicKey;
 
     let nowBn: anchor.BN;
     let startIdoTs: anchor.BN;
     let endIdoTs: anchor.BN;
-    let withDrawFiatTs: anchor.BN;
+    let withDrawDepositTokenTs: anchor.BN;
 
     const payer = anchor.web3.Keypair.generate();
     const mintAuthority = anchor.web3.Keypair.generate();
 
     const project = anchor.web3.Keypair.generate();
-    const investor = anchor.web3.Keypair.generate();
+    const depositor = anchor.web3.Keypair.generate();
 
     let pool = anchor.web3.Keypair.generate();
 
@@ -79,14 +79,14 @@ describe("ido-program", () => {
             }),
             SystemProgram.transfer({
                 fromPubkey: payer.publicKey,
-                toPubkey: investor.publicKey,
+                toPubkey: depositor.publicKey,
                 lamports: 2000000000,
             })
         );
 
         await provider.sendAndConfirm(tx, [payer]);
 
-        fiatMint = await createMint(
+        depositTokenMint = await createMint(
             provider.connection,
             payer,
             mintAuthority.publicKey,
@@ -102,39 +102,39 @@ describe("ido-program", () => {
             0
         );
 
-        projectFiat = await createAccount(
+        projectDepositAccount = await createAccount(
             provider.connection,
             payer,
-            fiatMint,
+            depositTokenMint,
             project.publicKey
         );
 
-        projectNative = await createAccount(
+        projectNativeAccount = await createAccount(
             provider.connection,
             payer,
             nativeMint,
             project.publicKey
         );
 
-        investorFiat = await createAccount(
+        depositorDepositAccount = await createAccount(
             provider.connection,
             payer,
-            fiatMint,
-            investor.publicKey
+            depositTokenMint,
+            depositor.publicKey
         );
 
-        investorNative = await createAccount(
+        depositorNativeAccount = await createAccount(
             provider.connection,
             payer,
             nativeMint,
-            investor.publicKey
+            depositor.publicKey
         );
 
         await mintTo(
             provider.connection,
             payer,
             nativeMint,
-            projectNative,
+            projectNativeAccount,
             mintAuthority,
             nativeTokenAmount.toNumber()
         );
@@ -142,19 +142,19 @@ describe("ido-program", () => {
         await mintTo(
             provider.connection,
             payer,
-            fiatMint,
-            investorFiat,
+            depositTokenMint,
+            depositorDepositAccount,
             mintAuthority,
             10000
         );
 
-        const projectNativeTokenAccount = await getAccount(
+        const projectNativeAccountTokenAccount = await getAccount(
             provider.connection,
-            projectNative
+            projectNativeAccount
         );
 
         assert.strictEqual(
-            projectNativeTokenAccount.amount.toString(),
+            projectNativeAccountTokenAccount.amount.toString(),
             nativeTokenAmount.toNumber().toString()
         );
     });
@@ -176,11 +176,11 @@ describe("ido-program", () => {
             0
         );
 
-        investorRedeemable = await createAccount(
+        depositorRedeemable = await createAccount(
             provider.connection,
             payer,
             redeemableMint,
-            investor.publicKey
+            depositor.publicKey
         );
 
         let poolNativeAccount = await getOrCreateAssociatedTokenAccount(
@@ -194,42 +194,41 @@ describe("ido-program", () => {
 
         poolNative = poolNativeAccount.address;
 
-        let poolFiatAccount = await getOrCreateAssociatedTokenAccount(
+        let poolDepositTokenAccount = await getOrCreateAssociatedTokenAccount(
             provider.connection,
             payer,
-            fiatMint,
+            depositTokenMint,
             poolSigner,
             true,
             undefined
         );
 
-        poolFiat = poolFiatAccount.address;
+        poolDepositToken = poolDepositTokenAccount.address;
 
         nowBn = new anchor.BN(Date.now() / 1000);
         startIdoTs = nowBn.add(new anchor.BN(10));
         endIdoTs = nowBn.add(new anchor.BN(20));
-        withDrawFiatTs = nowBn.add(new anchor.BN(30));
+        withDrawDepositTokenTs = nowBn.add(new anchor.BN(30));
 
         await program.methods
             .initializePool(
                 nativeTokenAmount,
                 startIdoTs,
                 endIdoTs,
-                withDrawFiatTs,
+                withDrawDepositTokenTs,
                 bump
             )
             .accounts({
                 pool: pool.publicKey,
                 poolSigner: poolSigner,
                 redeemableMint: redeemableMint,
-                fiatMint: fiatMint,
+                depositTokenMint: depositTokenMint,
                 nativeMint: nativeMint,
                 poolNative: poolNative,
-                poolFiat: poolFiat,
+                poolDepositToken: poolDepositToken,
                 authority: project.publicKey,
-                creatorNative: projectNative,
+                creatorNative: projectNativeAccount,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
                 systemProgram: anchor.web3.SystemProgram.programId,
             })
             .signers([pool, project])
@@ -266,8 +265,8 @@ describe("ido-program", () => {
             nativeMint.toBase58()
         );
         assert.strictEqual(
-            createdPool.poolFiat.toBase58(),
-            poolFiat.toBase58()
+            createdPool.poolDepositToken.toBase58(),
+            poolDepositToken.toBase58()
         );
         assert.strictEqual(
             createdPool.totalNativeTokens.toNumber().toString(),
@@ -282,67 +281,66 @@ describe("ido-program", () => {
             endIdoTs.toString()
         );
         assert.strictEqual(
-            createdPool.withdrawFiatTs.toNumber().toString(),
-            withDrawFiatTs.toString()
+            createdPool.withdrawDepositTokenTs.toNumber().toString(),
+            withDrawDepositTokenTs.toString()
         );
     });
 
     let firstDeposit = 5000;
 
-    it("Can exchange investor Fiat for redeemable tokens", async () => {
+    it("Can exchange depositor Deposit tokens for Redeemable tokens", async () => {
         if (Date.now() < startIdoTs.toNumber() * 1000) {
             await sleep(startIdoTs.toNumber() * 1000 - Date.now() + 5000);
         }
 
         await program.methods
-            .exchangeFiatForRedeemable(new anchor.BN(firstDeposit))
+            .exchangeDepositTokenForRedeemable(new anchor.BN(firstDeposit))
             .accounts({
                 pool: pool.publicKey,
                 poolSigner: poolSigner,
                 redeemableMint: redeemableMint,
-                fiatMint: fiatMint,
-                poolFiat: poolFiat,
-                authority: investor.publicKey,
-                investorFiat: investorFiat,
-                investorRedeemable: investorRedeemable,
+                depositTokenMint: depositTokenMint,
+                poolDepositToken: poolDepositToken,
+                authority: depositor.publicKey,
+                depositorDepositToken: depositorDepositAccount,
+                depositorRedeemable: depositorRedeemable,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
             })
-            .signers([investor])
+            .signers([depositor])
             .rpc();
 
-        const poolFiatTokenAccount = await getAccount(
+        const poolDepositTokenTokenAccount = await getAccount(
             provider.connection,
-            poolFiat
+            poolDepositToken
         );
 
         assert.strictEqual(
-            poolFiatTokenAccount.amount.toString(),
+            poolDepositTokenTokenAccount.amount.toString(),
             firstDeposit.toString()
         );
 
-        const investorFiatTokenAccount = await getAccount(
+        const depositorDepositAccountTokenAccount = await getAccount(
             provider.connection,
-            investorFiat
+            depositorDepositAccount
         );
 
-        const investorRedeemableTokenAccount = await getAccount(
+        const depositorRedeemableTokenAccount = await getAccount(
             provider.connection,
-            investorRedeemable
+            depositorRedeemable
         );
 
         assert.strictEqual(
-            investorFiatTokenAccount.amount.toString(),
+            depositorDepositAccountTokenAccount.amount.toString(),
             (10000 - firstDeposit).toString()
         );
 
         assert.strictEqual(
-            investorRedeemableTokenAccount.amount.toString(),
+            depositorRedeemableTokenAccount.amount.toString(),
             firstDeposit.toString()
         );
     });
 
-    it("Can exchange investor Redeemable tokens for Native tokens", async () => {
+    it("Can exchange depositor Redeemable tokens for Native tokens", async () => {
         if (Date.now() < endIdoTs.toNumber() * 1000) {
             await sleep(endIdoTs.toNumber() * 1000 - Date.now() + 5000);
         }
@@ -354,13 +352,12 @@ describe("ido-program", () => {
                 poolSigner: poolSigner,
                 redeemableMint: redeemableMint,
                 poolNative: poolNative,
-                authority: investor.publicKey,
-                investorNative: investorNative,
-                investorRedeemable: investorRedeemable,
+                authority: depositor.publicKey,
+                depositorNative: depositorNativeAccount,
+                depositorRedeemable: depositorRedeemable,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
             })
-            .signers([investor])
+            .signers([depositor])
             .rpc();
 
         const poolNativeTokenAccount = await getAccount(
@@ -370,61 +367,60 @@ describe("ido-program", () => {
 
         assert.strictEqual(poolNativeTokenAccount.amount.toString(), "0");
 
-        const investorNativeTokenAccount = await getAccount(
+        const depositorNativeAccountTokenAccount = await getAccount(
             provider.connection,
-            investorNative
+            depositorNativeAccount
         );
 
-        const investorRedeemableTokenAccount = await getAccount(
+        const depositorRedeemableTokenAccount = await getAccount(
             provider.connection,
-            investorRedeemable
+            depositorRedeemable
         );
 
         assert.strictEqual(
-            investorNativeTokenAccount.amount.toString(),
+            depositorNativeAccountTokenAccount.amount.toString(),
             nativeTokenAmount.toString()
         );
 
         assert.strictEqual(
-            investorRedeemableTokenAccount.amount.toString(),
+            depositorRedeemableTokenAccount.amount.toString(),
             "0"
         );
     });
 
-    it("Can withdraw total Fiat from pool account", async () => {
-        if (Date.now() < withDrawFiatTs.toNumber() * 1000) {
-            await sleep(withDrawFiatTs.toNumber() * 1000 - Date.now() + 5000);
+    it("Can withdraw total deposit tokens from pool account", async () => {
+        if (Date.now() < withDrawDepositTokenTs.toNumber() * 1000) {
+            await sleep(withDrawDepositTokenTs.toNumber() * 1000 - Date.now() + 5000);
         }
 
         await program.methods
-            .withdrawPoolFiat()
+            .withdrawPoolDepositToken()
             .accounts({
                 pool: pool.publicKey,
                 poolSigner: poolSigner,
-                fiatMint: fiatMint,
-                poolFiat: poolFiat,
+                depositTokenMint: depositTokenMint,
+                poolDepositToken: poolDepositToken,
                 payer: project.publicKey,
-                creatorFiat: projectFiat,
+                creatorDepositToken: projectDepositAccount,
                 tokenProgram: TOKEN_PROGRAM_ID,
-                clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
             })
             .signers([project])
             .rpc();
 
-        const poolFiatTokenAccount = await getAccount(
+        const poolDepositTokenTokenAccount = await getAccount(
             provider.connection,
-            poolFiat
+            poolDepositToken
         );
 
-        assert.strictEqual(poolFiatTokenAccount.amount.toString(), "0");
+        assert.strictEqual(poolDepositTokenTokenAccount.amount.toString(), "0");
 
-        const projectFiatTokenAccount = await getAccount(
+        const projectDepositAccountTokenAccount = await getAccount(
             provider.connection,
-            projectFiat
+            projectDepositAccount
         );
 
         assert.strictEqual(
-            projectFiatTokenAccount.amount.toString(),
+            projectDepositAccountTokenAccount.amount.toString(),
             firstDeposit.toString()
         );
     });
