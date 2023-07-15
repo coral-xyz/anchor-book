@@ -36,7 +36,6 @@ pub trait InstructionData: Discriminator + AnchorSerialize {
 }
 
 /// An event that can be emitted via a Solana log. See [`emit!`](crate::prelude::emit) for an example.
-
 pub trait Event: AnchorSerialize + AnchorDeserialize + Discriminator {
 	fn data(&self) -> Vec<u8>;
 }
