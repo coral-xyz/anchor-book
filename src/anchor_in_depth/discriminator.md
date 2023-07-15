@@ -28,11 +28,11 @@ pub trait ZeroCopy: Discriminator + Copy + Clone + Zeroable + Pod {}
 /// `args` is a borsh serialized struct of named fields for each argument given
 /// to an instruction.
 pub trait InstructionData: Discriminator + AnchorSerialize {
-	fn data(&self) -> Vec<u8> {
-		let mut d = Self::discriminator().to_vec();
-		d.append(&mut self.try_to_vec().expect("Should always serialize"));
-		d
-	}
+    fn data(&self) -> Vec<u8> {
+        let mut d = Self::discriminator().to_vec();
+        d.append(&mut self.try_to_vec().expect("Should always serialize"));
+        d
+    }
 }
 
 /// An event that can be emitted via a Solana log. See [`emit!`](crate::prelude::emit) for an example.
