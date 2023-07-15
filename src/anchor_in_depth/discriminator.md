@@ -40,14 +40,6 @@ pub trait Event: AnchorSerialize + AnchorDeserialize + Discriminator {
     fn data(&self) -> Vec<u8>;
 }
 
-// The serialized event data to be emitted via a Solana log.
-// TODO: remove this on the next major version upgrade.
-
-#[doc(hidden)]
-#[deprecated(since = "0.4.2", note = "Please use Event instead")]
-pub trait EventData: AnchorSerialize + Discriminator {
-	fn data(&self) -> Vec<u8>;
-}
 ```
 
 For instance, the `data()` method of the `InstructionData` trait creates a byte array containing the `Discriminator` and the serialized data of the instruction:
