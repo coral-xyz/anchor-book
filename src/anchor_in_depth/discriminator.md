@@ -19,7 +19,7 @@ Here, `DISCRIMINATOR` is an 8-byte array that represents the unique identifier o
 
 Other traits such as  `ZeroCopy`, `InstructionData`, `Event`, and `EventData` all require a type to implement `Discriminator`. This means that each type of data that wishes to be serialized, deserialized, or used in an event or instruction must have a unique `Discriminator`.
 
-```
+```rs
 /// An account data structure capable of zero copy deserialization.
 
 pub trait ZeroCopy: Discriminator + Copy + Clone + Zeroable + Pod {}
