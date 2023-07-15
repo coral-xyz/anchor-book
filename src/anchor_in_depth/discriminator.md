@@ -21,7 +21,6 @@ Other traits such as  `ZeroCopy`, `InstructionData`, `Event`, and `EventData` al
 
 ```rs
 /// An account data structure capable of zero copy deserialization.
-
 pub trait ZeroCopy: Discriminator + Copy + Clone + Zeroable + Pod {}
 
 /// Calculates the data for an instruction invocation, where the data is
