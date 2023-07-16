@@ -1,6 +1,6 @@
 ## What is a Discriminator?
 
-In the context of Anchor, a discriminator is a unique identifier used to distinguish between various types of data. A discriminator is particularly crucial for differentiating between different types of account data structures at runtime. In addition, discriminator is also added at the beginning of instructions so that the dispatch function in the anchor will be used to coordinate instructions to methods called in a program.
+In the context of Anchor, a discriminator is a unique identifier used to distinguish between various types of data. A discriminator is particularly crucial for differentiating between different types of account data structures at runtime. In addition, the discriminator is also prefixed to instructions, which assists the dispatch function in Anchor in routing these instructions to their corresponding methods within the program.
 
 `Discriminator` is defined as a trait with a `discriminator()` method and a `DISCRIMINATOR` constant:
 
