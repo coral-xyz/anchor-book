@@ -27,7 +27,7 @@
     - [Milestone Project - The Nightclub]()
 - [Anchor BTS]()
   - [Dispatch]()
-  - [The Discriminator]()
+  - [The Discriminator](./anchor_in_depth/discriminator.md)
 
 ---
 
