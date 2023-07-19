@@ -1,4 +1,4 @@
-## What is a Discriminator?
+## The Discriminator
 
 In the context of Anchor, a discriminator is a unique identifier used to distinguish between various types of data. A discriminator is particularly crucial for differentiating between different types of account data structures at runtime. In addition, the discriminator is also prefixed to instructions, which assists the dispatch function in Anchor in routing these instructions to their corresponding methods within the program.
 
@@ -17,7 +17,7 @@ Here, `DISCRIMINATOR` is an 8-byte array that represents the unique identifier o
 
 ## The Necessity of the Discriminator in Anchor
 
-Other traits such as  `ZeroCopy`, `InstructionData`, `Event`, and `EventData` all require a type to implement `Discriminator`. This means that each type of data that wishes to be serialized, deserialized, or used in an event or instruction must have a unique `Discriminator`.
+Other traits such as `ZeroCopy`, `InstructionData`, `Event`, and `EventData` all require a type to implement `Discriminator`. This means that each type of data that wishes to be serialized, deserialized, or used in an event or instruction must have a unique `Discriminator`.
 
 ```rs
 /// An account data structure capable of zero copy deserialization.
