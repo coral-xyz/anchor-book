@@ -55,7 +55,7 @@ In this example, when the `transfer` function is called, a `TransferEvent` is em
 ## Subscribing to Events
 External parties can subscribe to events emitted by your smart contract using Solana's event subscription mechanisms. This enables them to listen for specific events and take actions accordingly.
 
-For example, using Anchor js client library(@project-serum/anchor), you can subscribe to events like this:
+For example, using Anchor ts client library(@project-serum/anchor), you can subscribe to events like this:
 
 ```javascript
 import * as anchor from '@project-serum/anchor'
