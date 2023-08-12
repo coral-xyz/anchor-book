@@ -9,7 +9,21 @@ Events in Anchor Solana provide a powerful mechanism for notifying and communica
 - [Subscribing to Events](#subscribing-to-events)
 
 ## Introduction to Events
-An event is a structured piece of data that holds information about a specific occurrence in a smart contract program. It acts as a message to notify external parties about significant changes or transactions within the contract's state. Events can be used to provide transparency, traceability, and synchronization in decentralized applications.
+An event is a structured piece of data that holds information about a specific occurrence in a smart contract program. It acts as a message to notify external parties about significant changes or transactions within the contract's state. Events can be used to provide transparency, traceability, and synchronization in decentralized applications. 
+
+Events in Anchor are basically base64 encoded structs that are program logged. For ex, when you may write msg!() something to debug your Solana program, you are logging data. Events are essentially the same thing but they are not human readable as they are base64 encoded. The reason for this is that it is quite expensive to log string data:
+
+```rust
+#[proc_macro]
+pub fn emit(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let data: proc_macro2::TokenStream = input.into();
+    proc_macro::TokenStream::from(quote! {
+        {
+            anchor_lang::solana_program::log::sol_log_data(&[&anchor_lang::Event::data(&#data)]);
+        }
+    })
+}
+```
 
 ## Defining Events
 In Anchor Solana, events are defined using the `#[event]` attribute macro. This macro allows you to specify the fields that an event should contain. Events can include various data types, making them versatile for different use cases.
