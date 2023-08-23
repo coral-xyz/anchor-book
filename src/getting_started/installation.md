@@ -2,11 +2,14 @@
 
 ## Rust
 
-Go [here](https://www.rust-lang.org/tools/install) to install Rust.
+Go [here](https://www.rust-lang.org/tools/install) to install Rust or run 
+```
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
 
 ## Solana
 
-Go [here](https://docs.solana.com/cli/install-solana-cli-tools) to install Solana and then run `solana-keygen new` to create a keypair at the default location. Anchor uses this keypair to run your program tests.
+Go [here](https://docs.solana.com/cli/install-solana-cli-tools) to install Solana and then run `solana-keygen new` to create a keypair and saves the private seed in a json file at the default location. Anchor uses this keypair to run your program tests.
 
 ## Yarn
 
@@ -21,7 +24,7 @@ Anchor version manager is a tool for using multiple versions of the anchor-cli. 
 Install `avm` using Cargo. Note this will replace your `anchor` binary if you had one installed.
 
 ```
-cargo install --git https://github.com/project-serum/anchor avm --locked --force
+cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
 ```
 
 On Linux systems you may need to install additional dependencies if cargo install fails. E.g. on Ubuntu:
