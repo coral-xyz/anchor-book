@@ -5,4 +5,4 @@ This guide assumes that you already have some knowledge of basic Rust. We recomm
 
 ## Solana
 
-The next chapter explains some of the basic concepts required to make it through this book. That said, our intro chapter currently only briefly covers the basics, so we also recommend checking out the the official [Solana developers page](https://solana.com/developers). 
+The next chapter explains some of the basic concepts required to make it through this book. That said, our intro chapter currently only briefly covers the basics, so we also recommend checking out the official [Solana developers page](https://solana.com/developers). 
