@@ -74,7 +74,7 @@ anchor deploy
 Deploys all programs in the workspace to the configured cluster.
 
 ::: tip Note
-This is different from the `solana program deploy` command, because everytime it's run
+This is different from the `solana program deploy` command, because every time it's run
 it will generate a *new* program address.
 :::
 
@@ -94,7 +94,7 @@ If run with the `--program-name` option, expand only the given program.
 
 The `idl` subcommand provides commands for interacting with interface definition files.
 It's recommended to use these commands to store an IDL on chain, at a deterministic
-address, as a function of nothing but the the program's ID. This
+address, as a function of nothing but the program's ID. This
 allows us to generate clients for a program using nothing but the program ID.
 
 ### Idl Init
