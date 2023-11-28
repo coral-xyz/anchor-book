@@ -26,10 +26,11 @@ brew install mdbook
 Next, clone this repo and serve the book:
 
 ```sh
-git clone https://github.com/project-serum/anchor-book.git
+git clone https://github.com/coral-xyz/anchor-book.git
 cd anchor-book
 mdbook serve
 ```
+
 The book will be available at `http://localhost:3000` in your browser.
 
 ### Run an older version
