@@ -21,7 +21,7 @@
     - [PDAs](./anchor_in_depth/PDAs.md)
     - [Events]()
     - [Constants]()
-    - [Zero-Copy]()
+    - [Zero-Copy](./anchor_in_depth/zero-copy.md)
     - [Access Control]()
     - [Building & Testing]()
     - [Milestone Project - The Nightclub]()
