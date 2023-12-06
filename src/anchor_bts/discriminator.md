@@ -109,7 +109,7 @@ However, a user mistakenly passes Account B as an argument to the `foo` instruct
 
 This is where the discriminator comes into play. It uniquely identifies the type of an account. Even though Account A and Account B are structurally identical and share the same owner, they have different discriminators.
 
-When the `foo` instruction gets executed, the Anchor framework checks the discriminator of the account passed as argument. If you have declared `foo` as `foo: Account<'info, A>`, Anchor will make sure that the passed account's discriminator matches that of Account A. If the discriminators don't match (as would be the case if Account B was passed), Anchor raises an error, preventing any unintended effects on Account B.
+When the `foo` instruction gets executed, the Anchor framework checks the discriminator of the account passed as an argument. If you have declared `foo` as `foo: Account<'info, A>`, Anchor will make sure that the passed account's discriminator matches that of Account A. If the discriminators don't match (as would be the case if Account B was passed), Anchor raises an error, preventing any unintended effects on Account B.
 
 The discriminator helps Anchor to ensure that the account being processed is indeed the one expected, preventing type-related errors at runtime. This mechanism is automatically handled when you use the `Account` type in Anchor, adding an extra layer of security to your program.
 
