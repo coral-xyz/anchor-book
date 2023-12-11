@@ -12,6 +12,7 @@ Unlike normal addresses, PDAs are not public keys and therefore do not have an a
 Before we dive into how to use PDAs in anchor, here's a short explainer on what PDAs are.
 
 PDAs are created by hashing a number of seeds the user can choose and the id of a program:
+
 ```rust,ignore
 // pseudo code
 let pda = hash(seeds, program_id);
@@ -20,6 +21,7 @@ let pda = hash(seeds, program_id);
 The seeds can be anything. A pubkey, a string, an array of numbers etc.
 
 There's a 50% chance that this hash function results in a public key (but PDAs are not public keys), so a bump has to be searched for so that we get a PDA:
+
 ```rust,ignore
 // pseudo code
 fn find_pda(seeds, program_id) {
@@ -67,6 +69,7 @@ The `authority` would be the user the accounts belongs to.
 This approach creates the following problem. It's easy to go from the user stats account to the user account address (just read the `authority` field) but if you just have the user account address (which is more likely), how do you find the user stats account? You can't. This is a problem because your game probably has instructions that require both the user stats account and its authority which means the client needs to pass those accounts into the instruction (for example, a `ChangeName` instruction). So maybe the frontend could store a mapping between a user's account address and a user's info address in local storage. This works until the user accidentally wipes their local storage.
 
 With PDAs you can have a layout like this:
+
 ```rust,ignore
 pub struct UserStats {
   level: u16,
@@ -74,6 +77,7 @@ pub struct UserStats {
   bump: u8
 }
 ```
+
 and encode the information about the relationship between the user and the user stats account in the address of the user stats account itself.
 
 Reusing the pseudo code from above:
@@ -84,7 +88,8 @@ let seeds = [b"user-stats", authority];
 let (pda, bump) = find_pda(seeds, game_program_id);
 ```
 
-When a user connects to your website, this pda calculation can be done client-side using their user account address as the `authority`. The  resulting pda then serves as the address of the user's stats account. The `b"user-stats"` is added in case there are other account types that are also PDAs. If there were an inventory account, it could be inferred using these seeds:
+When a user connects to your website, this pda calculation can be done client-side using their user account address as the `authority`. The resulting pda then serves as the address of the user's stats account. The `b"user-stats"` is added in case there are other account types that are also PDAs. If there were an inventory account, it could be inferred using these seeds:
+
 ```rust,ignore
 let seeds = [b"inventory", authority];
 ```
@@ -94,6 +99,7 @@ To summarize, we have used PDAs to create a mapping between a user and their use
 #### How to build PDA hashmaps in Anchor
 
 Continuing with the example from the previous sections, create a new workspace
+
 ```
 anchor init game
 ```
@@ -151,6 +157,7 @@ Then, in the handler, we access `ctx.bumps.user_stats` to get the bump anchor fo
 account as an extra property.
 
 If we then want to use the created pda in a different instruction, we can add a new validation struct (This will check that the `user_stats` account is the pda created by running `hash(seeds, user_stats.bump, game_program_id)`):
+
 ```rust,ignore
 // validation struct
 #[derive(Accounts)]
@@ -160,7 +167,9 @@ pub struct ChangeUserName<'info> {
     pub user_stats: Account<'info, UserStats>,
 }
 ```
+
 and another handler function:
+
 ```rust,ignore
 // handler function (add this next to the create_user_stats function in the game module)
 pub fn change_user_name(ctx: Context<ChangeUserName>, new_name: String) -> Result<()> {
@@ -176,27 +185,26 @@ pub fn change_user_name(ctx: Context<ChangeUserName>, new_name: String) -> Resul
 Finally, let's add a test. Copy this into `game.ts`
 
 ```ts
-import * as anchor from '@project-serum/anchor';
-import { Program } from '@project-serum/anchor';
-import { PublicKey } from '@solana/web3.js';
-import { Game } from '../target/types/game';
-import { expect } from 'chai';
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { PublicKey } from "@solana/web3.js";
+import { Game } from "../target/types/game";
+import { expect } from "chai";
 
-describe('game', async() => {
+describe("game", async () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const program = anchor.workspace.Game as Program<Game>;
 
-  it('Sets and changes name!', async () => {
-    const [userStatsPDA, _] = await PublicKey
-      .findProgramAddress(
-        [
-          anchor.utils.bytes.utf8.encode("user-stats"),
-          provider.wallet.publicKey.toBuffer()
-        ],
-        program.programId
-      );
+  it("Sets and changes name!", async () => {
+    const [userStatsPDA, _] = await PublicKey.findProgramAddress(
+      [
+        anchor.utils.bytes.utf8.encode("user-stats"),
+        provider.wallet.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
 
     await program.methods
       .createUserStats("brian")
@@ -206,17 +214,21 @@ describe('game', async() => {
       })
       .rpc();
 
-    expect((await program.account.userStats.fetch(userStatsPDA)).name).to.equal("brian");
+    expect((await program.account.userStats.fetch(userStatsPDA)).name).to.equal(
+      "brian"
+    );
 
     await program.methods
       .changeUserName("tom")
       .accounts({
         user: provider.wallet.publicKey,
-        userStats: userStatsPDA
+        userStats: userStatsPDA,
       })
       .rpc();
 
-    expect((await program.account.userStats.fetch(userStatsPDA)).name).to.equal("tom");
+    expect((await program.account.userStats.fetch(userStatsPDA)).name).to.equal(
+      "tom"
+    );
   });
 });
 ```
@@ -232,7 +244,7 @@ A subtle result of this hashmap structure is enforced uniqueness. When `init` is
 Creating PDAs requires them to sign the `createAccount` CPI of the system program. How does that work?
 
 PDAs are not public keys so it's impossible for them to sign anything. However, PDAs can still pseudo sign CPIs.
-In anchor, to sign with a pda you have to change `CpiContext::new(cpi_program, cpi_accounts)` to `CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)` where the `seeds` argument are the seeds _and_ the bump the PDA was created with. 
+In anchor, to sign with a pda you have to change `CpiContext::new(cpi_program, cpi_accounts)` to `CpiContext::new_with_signer(cpi_program, cpi_accounts, seeds)` where the `seeds` argument are the seeds _and_ the bump the PDA was created with.
 When the CPI is invoked, for each account in `cpi_accounts` the Solana runtime will check whether`hash(seeds, current_program_id) == account address` is true. If yes, that account's `is_signer` flag will be turned to true.
 This means a PDA derived from some program X, may only be used to sign CPIs that originate from that program X. This means that on a high level, PDA signatures can be considered program signatures.
 
@@ -242,6 +254,7 @@ For instance, lending protocol programs need to manage deposited collateral and 
 Let's revisit the puppet workspace and add a PDA signature.
 
 First, adjust the puppet-master code:
+
 ```rust,ignore
 use anchor_lang::prelude::*;
 use puppet::cpi::accounts::SetData;
@@ -286,26 +299,28 @@ impl<'info> PullStrings<'info> {
 The `authority` account is now an `UncheckedAccount` instead of a `Signer`. When the puppet-master is invoked, the `authority` pda is not a signer yet so we mustn't add a check for it. We just care about the puppet-master being able to sign so we don't add any additional seeds. Just a bump that is calculated off-chain and then passed to the function.
 
 Finally, this is the new `puppet.ts`:
-```ts
-import * as anchor from '@project-serum/anchor';
-import { Program } from '@project-serum/anchor';
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { Puppet } from '../target/types/puppet';
-import { PuppetMaster } from '../target/types/puppet_master';
-import { expect } from 'chai';
 
-describe('puppet', () => {
+```ts
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { Puppet } from "../target/types/puppet";
+import { PuppetMaster } from "../target/types/puppet_master";
+import { expect } from "chai";
+
+describe("puppet", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
-  const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
+  const puppetMasterProgram = anchor.workspace
+    .PuppetMaster as Program<PuppetMaster>;
 
   const puppetKeypair = Keypair.generate();
 
-  it('Does CPI!', async () => {
-    const [puppetMasterPDA, puppetMasterBump] = await PublicKey
-      .findProgramAddress([], puppetMasterProgram.programId);
+  it("Does CPI!", async () => {
+    const [puppetMasterPDA, puppetMasterBump] =
+      await PublicKey.findProgramAddress([], puppetMasterProgram.programId);
 
     await puppetProgram.methods
       .initialize(puppetMasterPDA)
@@ -321,12 +336,15 @@ describe('puppet', () => {
       .accounts({
         puppetProgram: puppetProgram.programId,
         puppet: puppetKeypair.publicKey,
-        authority: puppetMasterPDA
+        authority: puppetMasterPDA,
       })
       .rpc();
 
-    expect((await puppetProgram.account.data
-      .fetch(puppetKeypair.publicKey)).data.toNumber()).to.equal(42);
+    expect(
+      (
+        await puppetProgram.account.data.fetch(puppetKeypair.publicKey)
+      ).data.toNumber()
+    ).to.equal(42);
   });
 });
 ```
