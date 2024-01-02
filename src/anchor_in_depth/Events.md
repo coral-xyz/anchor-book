@@ -88,15 +88,20 @@ program.removeEventListener("TransferEvent");
 
 ## CPI Events
 
-It must be remembered that Events are base64 encoded Solana logs and that Solana logs are truncated to a max of 10Kb per transaction.RPC providers may truncate large events logs leading to unrealiable event delivery especially for large events. You may use CPI(Cross Program Invocation) events feature of anchor to emit events in transaction metadata to prevent this truncation.
-Note: You need to use an anchor version of at least 0.28.0 to use this.
+It must be remembered that Events are base64 encoded Solana logs and that Solana logs are truncated to a max of 10Kb per transaction.RPC providers may truncate large events logs leading to unrealiable event delivery especially for large events. 
+
+You may use CPI(Cross Program Invocation) events feature of anchor to emit events in transaction metadata which is less likely to be truncated by RPCs.
+
+Under the hood, CPI events use the invoke_signed syscall to store event data in transaction metadata. This methods uses an additional PDA to invoke a self-cpi call to invoke CPI events without requiring an additional "noop" program.
+
+Note: You need to use an anchor version of at least 0.28.0 and enable the event-cpi feature to use this. 
 
 Example usage of emit_cpi macro to emit CPI events
 ```rust
 #[program]
 pub mod my_program {
     use super::*;
-    
+
     pub fn transfer(ctx: Context<TransferContext>, amount: u64) -> Result<()>  {
         // Perform transfer logic
         
@@ -110,6 +115,10 @@ pub mod my_program {
         Ok(())
     }
 }
+
+#[event_cpi]
+#[derive(Accounts)]
+pub struct TransferContext {}
 ```
 
 ## Conclusion
