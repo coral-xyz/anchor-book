@@ -1,4 +1,5 @@
 # CLI
+
 A CLI is provided to support building and managing an Anchor workspace.
 For a comprehensive list of commands and options, run `anchor -h` on any
 of the following subcommands.
@@ -30,7 +31,6 @@ SUBCOMMANDS:
                command inside a program subdirectory, i.e., in the dir containing the program's
                Cargo.toml
 ```
-
 
 ## Build
 
@@ -74,8 +74,8 @@ anchor deploy
 Deploys all programs in the workspace to the configured cluster.
 
 ::: tip Note
-This is different from the `solana program deploy` command, because everytime it's run
-it will generate a *new* program address.
+This is different from the `solana program deploy` command, because every time it's run
+it will generate a _new_ program address.
 :::
 
 ## Expand
@@ -94,7 +94,7 @@ If run with the `--program-name` option, expand only the given program.
 
 The `idl` subcommand provides commands for interacting with interface definition files.
 It's recommended to use these commands to store an IDL on chain, at a deterministic
-address, as a function of nothing but the the program's ID. This
+address, as a function of nothing but the program's ID. This
 allows us to generate clients for a program using nothing but the program ID.
 
 ### Idl Init
@@ -161,13 +161,13 @@ anchor init
 
 Initializes a project workspace with the following structure.
 
-* `Anchor.toml`: Anchor configuration file.
-* `Cargo.toml`: Rust workspace configuration file.
-* `package.json`: JavaScript dependencies file.
-* `programs/`: Directory for Solana program crates.
-* `app/`: Directory for your application frontend.
-* `tests/`: Directory for JavaScript integration tests.
-* `migrations/deploy.js`: Deploy script.
+- `Anchor.toml`: Anchor configuration file.
+- `Cargo.toml`: Rust workspace configuration file.
+- `package.json`: JavaScript dependencies file.
+- `programs/`: Directory for Solana program crates.
+- `app/`: Directory for your application frontend.
+- `tests/`: Directory for JavaScript integration tests.
+- `migrations/deploy.js`: Deploy script.
 
 ## Migrate
 
@@ -181,13 +181,13 @@ from the workspace's `Anchor.toml`. For example,
 ```javascript
 // File: migrations/deploys.js
 
-const anchor = require("@project-serum/anchor");
+const anchor = require("@coral-xyz/anchor");
 
 module.exports = async function (provider) {
   anchor.setProvider(provider);
 
   // Add your deploy script here.
-}
+};
 ```
 
 Migrations are a new feature
@@ -222,7 +222,7 @@ If the configured network is a localnet, then automatically starts the localnetw
 the test.
 
 > Note: Be sure to shutdown any other local validators, otherwise `anchor test` will fail to run.
-> 
+>
 > If you'd prefer to run the program against your local validator use `anchor test --skip-local-validator`.
 
 When running tests we stream program logs to `.anchor/program-logs/<address>.<program-name>.log`

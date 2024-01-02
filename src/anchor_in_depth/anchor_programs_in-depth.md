@@ -4,4 +4,4 @@ This section explains how you can use Anchor to build Solana programs. Each sect
 anchor init hello-anchor
 ```
 
-This sections begins with the essentials and then explains more intermediate content afterwards.
+This section begins with the essentials and then explains more intermediate content afterwards.

@@ -7,6 +7,7 @@ Consider the following example of a puppet and a puppet master. Admittedly, it i
 ## Setting up basic CPI functionality
 
 Create a new workspace
+
 ```
 anchor init puppet
 ```
@@ -56,9 +57,11 @@ pub struct Data {
 There's nothing special happening here. It's a pretty simple program! The interesting part is how it interacts with the next program we are going to create.
 
 Run
+
 ```
 anchor new puppet-master
 ```
+
 inside the workspace and copy the following code:
 
 ```rust,ignore
@@ -91,6 +94,7 @@ pub struct PullStrings<'info> {
 ```
 
 Also add the line `puppet_master = "HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L"` in the `[programs.localnet]` section of your `Anchor.toml`. Finally, import the puppet program into the puppet-master program by adding the following line to the `[dependencies]` section of the `Cargo.toml` file inside the `puppet-master` program folder:
+
 ```toml
 puppet = { path = "../puppet", features = ["cpi"]}
 ```
@@ -100,6 +104,7 @@ The `features = ["cpi"]` is used so we can not only use puppet's types but also 
 In the case of the puppet program, the puppet-master uses the `SetData` instruction builder struct provided by the `puppet::cpi::accounts` module to submit the accounts the `SetData` instruction of the puppet program expects. Then, the puppet-master creates a new cpi context and passes it to the `puppet::cpi::set_data` cpi function. This function has the exact same function as the `set_data` function in the puppet program with the exception that it expects a `CpiContext` instead of a `Context`.
 
 Setting up a CPI can distract from the business logic of the program so it's recommended to move the CPI setup into the `impl` block of the instruction. The puppet-master program then looks like this:
+
 ```rust,ignore
 use anchor_lang::prelude::*;
 use puppet::cpi::accounts::SetData;
@@ -135,43 +140,48 @@ impl<'info> PullStrings<'info> {
 ```
 
 We can verify that everything works as expected by replacing the contents of the `puppet.ts` file with:
-```ts
-import * as anchor from '@project-serum/anchor';
-import { Program } from '@project-serum/anchor';
-import { Keypair } from '@solana/web3.js';
-import { expect } from 'chai';
-import { Puppet } from '../target/types/puppet';
-import { PuppetMaster } from '../target/types/puppet_master';
 
-describe('puppet', () => {
+```ts
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { Keypair } from "@solana/web3.js";
+import { expect } from "chai";
+import { Puppet } from "../target/types/puppet";
+import { PuppetMaster } from "../target/types/puppet_master";
+
+describe("puppet", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
-  const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
+  const puppetMasterProgram = anchor.workspace
+    .PuppetMaster as Program<PuppetMaster>;
 
   const puppetKeypair = Keypair.generate();
 
-  it('Does CPI!', async () => {
+  it("Does CPI!", async () => {
     await puppetProgram.methods
-        .initialize()
-        .accounts({
-            puppet: puppetKeypair.publicKey,
-            user: provider.wallet.publicKey,
-        })
-        .signers([puppetKeypair])
-        .rpc();
+      .initialize()
+      .accounts({
+        puppet: puppetKeypair.publicKey,
+        user: provider.wallet.publicKey,
+      })
+      .signers([puppetKeypair])
+      .rpc();
 
     await puppetMasterProgram.methods
-        .pullStrings(new anchor.BN(42))
-        .accounts({
-            puppetProgram: puppetProgram.programId,
-            puppet: puppetKeypair.publicKey
-        })
-        .rpc();
+      .pullStrings(new anchor.BN(42))
+      .accounts({
+        puppetProgram: puppetProgram.programId,
+        puppet: puppetKeypair.publicKey,
+      })
+      .rpc();
 
-    expect((await puppetProgram.account.data
-      .fetch(puppetKeypair.publicKey)).data.toNumber()).to.equal(42);
+    expect(
+      (
+        await puppetProgram.account.data.fetch(puppetKeypair.publicKey)
+      ).data.toNumber()
+    ).to.equal(42);
   });
 });
 ```
@@ -183,6 +193,7 @@ and running `anchor test`.
 CPIs extend the privileges of the caller to the callee. The puppet account was passed as a mutable account to the puppet-master but it was still mutable in the puppet program as well (otherwise the `expect` in the test would've failed). The same applies to signatures.
 
 If you want to prove this for yourself, add an `authority` field to the `Data` struct in the puppet program.
+
 ```rust,ignore
 #[account]
 pub struct Data {
@@ -192,6 +203,7 @@ pub struct Data {
 ```
 
 and adjust the `initialize` function:
+
 ```rust,ignore
 pub fn initialize(ctx: Context<Initialize>, authority: Pubkey) -> Result<()> {
     ctx.accounts.puppet.authority = authority;
@@ -200,6 +212,7 @@ pub fn initialize(ctx: Context<Initialize>, authority: Pubkey) -> Result<()> {
 ```
 
 Add `32` to the `space` constraint of the `puppet` field for the `Pubkey` field in the `Data` struct.
+
 ```rust,ignore
 #[derive(Accounts)]
 pub struct Initialize<'info> {
@@ -212,6 +225,7 @@ pub struct Initialize<'info> {
 ```
 
 Then, adjust the `SetData` validation struct:
+
 ```rust,ignore
 #[derive(Accounts)]
 pub struct SetData<'info> {
@@ -224,6 +238,7 @@ pub struct SetData<'info> {
 The `has_one` constraint checks that `puppet.authority = authority.key()`.
 
 The puppet-master program now also needs adjusting:
+
 ```rust,ignore
 use anchor_lang::prelude::*;
 use puppet::cpi::accounts::SetData;
@@ -266,45 +281,49 @@ impl<'info> PullStrings<'info> {
 Finally, change the test:
 
 ```ts
-import * as anchor from '@project-serum/anchor';
-import { Program } from '@project-serum/anchor';
-import { Keypair } from '@solana/web3.js';
-import { Puppet } from '../target/types/puppet';
-import { PuppetMaster } from '../target/types/puppet_master';
-import { expect } from 'chai';
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { Keypair } from "@solana/web3.js";
+import { Puppet } from "../target/types/puppet";
+import { PuppetMaster } from "../target/types/puppet_master";
+import { expect } from "chai";
 
-describe('puppet', () => {
+describe("puppet", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const puppetProgram = anchor.workspace.Puppet as Program<Puppet>;
-  const puppetMasterProgram = anchor.workspace.PuppetMaster as Program<PuppetMaster>;
+  const puppetMasterProgram = anchor.workspace
+    .PuppetMaster as Program<PuppetMaster>;
 
   const puppetKeypair = Keypair.generate();
   const authorityKeypair = Keypair.generate();
 
-  it('Does CPI!', async () => {
+  it("Does CPI!", async () => {
     await puppetProgram.methods
-        .initialize(authorityKeypair.publicKey)
-        .accounts({
-            puppet: puppetKeypair.publicKey,
-            user: provider.wallet.publicKey,
-        })
-        .signers([puppetKeypair])
-        .rpc();
+      .initialize(authorityKeypair.publicKey)
+      .accounts({
+        puppet: puppetKeypair.publicKey,
+        user: provider.wallet.publicKey,
+      })
+      .signers([puppetKeypair])
+      .rpc();
 
     await puppetMasterProgram.methods
-        .pullStrings(new anchor.BN(42))
-        .accounts({
-            puppetProgram: puppetProgram.programId,
-            puppet: puppetKeypair.publicKey,
-            authority: authorityKeypair.publicKey
-        })
-        .signers([authorityKeypair])
-        .rpc();
+      .pullStrings(new anchor.BN(42))
+      .accounts({
+        puppetProgram: puppetProgram.programId,
+        puppet: puppetKeypair.publicKey,
+        authority: authorityKeypair.publicKey,
+      })
+      .signers([authorityKeypair])
+      .rpc();
 
-    expect((await puppetProgram.account.data
-      .fetch(puppetKeypair.publicKey)).data.toNumber()).to.equal(42);
+    expect(
+      (
+        await puppetProgram.account.data.fetch(puppetKeypair.publicKey)
+      ).data.toNumber()
+    ).to.equal(42);
   });
 });
 ```
@@ -325,6 +344,7 @@ In the puppet program, the `Account<'info, T>` type is used for the `puppet` acc
 the caller's account does not change during the instruction.
 
 You can easily see this for yourself by adding the following right after the `puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)` cpi call.
+
 ```rust,ignore
 puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)?;
 if ctx.accounts.puppet.data != 42 {
@@ -332,6 +352,7 @@ if ctx.accounts.puppet.data != 42 {
 }
 Ok(())
 ```
+
 Now your test will fail. But why? After all the test used to pass, so the cpi definitely did change the `data` field to `42`.
 
 The reason the `data` field has not been updated to `42` in the caller is that at the beginning of the instruction the `Account<'info, T>` type deserializes the incoming bytes into a new struct. This struct is no longer connected to the underlying data in the account. The CPI changes the data in the underlying account but since the struct in the caller has no connection to the underlying account the struct in the caller remains unchanged.
