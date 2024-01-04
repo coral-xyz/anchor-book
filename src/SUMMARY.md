@@ -19,7 +19,7 @@
   - [Intermediate](./anchor_in_depth/intermediate.md)
     - [Cross-Program Invocations](./anchor_in_depth/CPIs.md)
     - [PDAs](./anchor_in_depth/PDAs.md)
-    - [Events](./anchor_in_depth/Events.md)
+    - [Events](./anchor_in_depth/events.md)
     - [Constants]()
     - [Zero-Copy]()
     - [Access Control]()
