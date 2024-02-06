@@ -1,0 +1,263 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Discriminator - The Anchor Book v0.29.0</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../introduction/what_is_anchor.html"><strong aria-hidden="true">1.1.</strong> What is Anchor</a></li><li class="chapter-item expanded "><a href="../introduction/anchor_documentation.html"><strong aria-hidden="true">1.2.</strong> Anchor Documentation</a></li></ol></li><li class="chapter-item expanded "><a href="../prerequisites/prerequisites.html"><strong aria-hidden="true">2.</strong> Prerequisites</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../prerequisites/useful_resources.html"><strong aria-hidden="true">2.1.</strong> Useful Resources</a></li><li class="chapter-item expanded "><a href="../prerequisites/intro_to_solana.html"><strong aria-hidden="true">2.2.</strong> Intro to Solana</a></li></ol></li><li class="chapter-item expanded "><a href="../getting_started/getting_started.html"><strong aria-hidden="true">3.</strong> Getting Started</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting_started/installation.html"><strong aria-hidden="true">3.1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../getting_started/hello_anchor.html"><strong aria-hidden="true">3.2.</strong> Hello, Anchor!</a></li></ol></li><li class="chapter-item expanded "><a href="../anchor_in_depth/anchor_programs_in-depth.html"><strong aria-hidden="true">4.</strong> Anchor Programs In-Depth</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/essentials.html"><strong aria-hidden="true">4.1.</strong> Essentials</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/high-level_overview.html"><strong aria-hidden="true">4.1.1.</strong> High-level Overview</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/the_accounts_struct.html"><strong aria-hidden="true">4.1.2.</strong> The Accounts Struct</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/the_program_module.html"><strong aria-hidden="true">4.1.3.</strong> The Program Module</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/errors.html"><strong aria-hidden="true">4.1.4.</strong> Errors</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/milestone_project_tic-tac-toe.html"><strong aria-hidden="true">4.1.5.</strong> Milestone Project - Tic-Tac-Toe</a></li></ol></li><li class="chapter-item expanded "><a href="../anchor_in_depth/intermediate.html"><strong aria-hidden="true">4.2.</strong> Intermediate</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/CPIs.html"><strong aria-hidden="true">4.2.1.</strong> Cross-Program Invocations</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/PDAs.html"><strong aria-hidden="true">4.2.2.</strong> PDAs</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/events.html"><strong aria-hidden="true">4.2.3.</strong> Events</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.4.</strong> Constants</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.5.</strong> Zero-Copy</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.6.</strong> Access Control</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.7.</strong> Building &amp; Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.8.</strong> Milestone Project - The Nightclub</div></li></ol></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> Anchor BTS</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_bts/discriminator.html" class="active"><strong aria-hidden="true">5.1.</strong> The Discriminator</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.2.</strong> Dispatch</div></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../anchor_references/anchor_references.html"><strong aria-hidden="true">6.</strong> Anchor References</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_references/space.html"><strong aria-hidden="true">6.1.</strong> Space Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/javascript_anchor_types_reference.html"><strong aria-hidden="true">6.2.</strong> Javascript Anchor Types Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/cli.html"><strong aria-hidden="true">6.3.</strong> CLI Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/avm.html"><strong aria-hidden="true">6.4.</strong> AVM Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/anchor-toml_reference.html"><strong aria-hidden="true">6.5.</strong> Anchor.toml Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/reference_links.html"><strong aria-hidden="true">6.6.</strong> Code References</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Anchor Book v0.29.0</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="the-discriminator"><a class="header" href="#the-discriminator">The Discriminator</a></h2>
+<p>In the context of Anchor, a discriminator is a unique identifier used to distinguish between various types of data. A discriminator is particularly crucial for differentiating between different types of account data structures at runtime. In addition, the discriminator is also prefixed to instructions, which assists the dispatch function in Anchor in routing these instructions to their corresponding methods within the program.</p>
+<p><code>Discriminator</code> is defined as a trait with a <code>discriminator()</code> method and a <code>DISCRIMINATOR</code> constant:</p>
+<pre><code class="language-rs">pub trait Discriminator {
+    const DISCRIMINATOR: [u8; 8];
+    fn discriminator() -&gt; [u8; 8] {
+        Self::DISCRIMINATOR
+    }
+}
+</code></pre>
+<p>Here, <code>DISCRIMINATOR</code> is an 8-byte array that represents the unique identifier of a type of data. The <code>discriminator()</code> method returns the value of <code>DISCRIMINATOR</code>.</p>
+<h2 id="the-necessity-of-the-discriminator-in-anchor"><a class="header" href="#the-necessity-of-the-discriminator-in-anchor">The Necessity of the Discriminator in Anchor</a></h2>
+<p>Other traits such as <code>ZeroCopy</code>, <code>InstructionData</code>, <code>Event</code>, and <code>EventData</code> all require a type to implement <code>Discriminator</code>. This means that each type of data that wishes to be serialized, deserialized, or used in an event or instruction must have a unique <code>Discriminator</code>.</p>
+<pre><code class="language-rs">/// An account data structure capable of zero copy deserialization.
+pub trait ZeroCopy: Discriminator + Copy + Clone + Zeroable + Pod {}
+
+/// Calculates the data for an instruction invocation, where the data is
+/// `Sha256(&lt;namespace&gt;:&lt;method_name&gt;)[..8] || BorshSerialize(args)`.
+/// `args` is a borsh serialized struct of named fields for each argument given
+/// to an instruction.
+pub trait InstructionData: Discriminator + AnchorSerialize {
+    fn data(&amp;self) -&gt; Vec&lt;u8&gt; {
+        let mut d = Self::discriminator().to_vec();
+        d.append(&amp;mut self.try_to_vec().expect(&quot;Should always serialize&quot;));
+        d
+    }
+}
+
+/// An event that can be emitted via a Solana log. See [`emit!`](crate::prelude::emit) for an example.
+pub trait Event: AnchorSerialize + AnchorDeserialize + Discriminator {
+    fn data(&amp;self) -&gt; Vec&lt;u8&gt;;
+}
+</code></pre>
+<p>For instance, the <code>data()</code> method of the <code>InstructionData</code> trait creates a byte array containing the <code>Discriminator</code> and the serialized data of the instruction:</p>
+<pre><code class="language-rs">pub trait InstructionData: Discriminator + AnchorSerialize {
+    fn data(&amp;self) -&gt; Vec&lt;u8&gt; {
+        let mut d = Self::discriminator().to_vec();
+        d.append(&amp;mut self.try_to_vec().expect(&quot;Should always serialize&quot;));
+        d
+    }
+}
+</code></pre>
+<p>Here, <code>Self::discriminator().to_vec()</code> creates a vector containing the <code>Discriminator</code> of the data type, and <code>self.try_to_vec().expect(&quot;Should always serialize&quot;)</code> creates a vector containing the serialized data of the instruction. Both vectors are then concatenated to create the resulting byte array.</p>
+<h2 id="discriminators-in-anchor-account-processing"><a class="header" href="#discriminators-in-anchor-account-processing">Discriminators in Anchor Account Processing</a></h2>
+<p>This code block is part of the <code>#[account]</code> procedural macro implementation and is responsible for implementing the <code>Discriminator</code> trait for a specific account struct.</p>
+<pre><code class="language-rs">impl #impl_gen anchor_lang::Discriminator for #account_name #type_gen #where_clause {
+    const DISCRIMINATOR: [u8; 8] = #discriminator;
+}
+</code></pre>
+<p>The following piece of code computes the Discriminator by hashing the namespace of the account structure and the name of the account structure. It then takes the first 8 bytes of this hash to form the discriminator. This Discriminator is used to uniquely identify the account structure during the serialization and deserialization process.</p>
+<pre><code class="language-rs">let discriminator: proc_macro2::TokenStream = {
+    // Namespace the discriminator to prevent collisions.
+    let discriminator_preimage = {
+        // For now, zero copy accounts can't be namespaced.
+        if namespace.is_empty() {
+            format!(&quot;account:{account_name}&quot;)
+        } else {
+            format!(&quot;{namespace}:{account_name}&quot;)
+        }
+    };
+    let mut discriminator = [0u8; 8];
+    discriminator.copy_from_slice(
+        &amp;anchor_syn::hash::hash(discriminator_preimage.as_bytes()).to_bytes()[..8],
+    );
+    format!(&quot;{discriminator:?}&quot;).parse().unwrap()
+};
+</code></pre>
+<p>When the account data is being deserialized, this function first checks the length of the data buffer to ensure it is at least as long as the discriminator. It then compares the first 8 bytes of the data buffer with the expected discriminator. If they do not match, this is an indication that an incorrect account data structure is being used, and the function will return with an error.</p>
+<pre><code class="language-rs">fn try_deserialize(buf: &amp;mut &amp;[u8]) -&gt; anchor_lang::Result&lt;Self&gt; {
+    if buf.len() &lt; #discriminator.len() {
+        return Err(anchor_lang::error::ErrorCode::AccountDiscriminatorNotFound.into());
+    }
+    let given_disc = &amp;buf[..8];
+    if &amp;#discriminator != given_disc {
+        return Err(anchor_lang::error!(anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch).with_account_name(#account_name_str));
+    }
+    Self::try_deserialize_unchecked(buf)
+}
+</code></pre>
+<p>Let's illustrate the importance of the discriminator with an example.</p>
+<p>Consider a program that manages two types of accounts, Account A and Account B. Both accounts are owned by the same program and have identical fields. Now, suppose you have an instruction called <code>foo</code> that is designed to only operate on Account A.</p>
+<p>However, a user mistakenly passes Account B as an argument to the <code>foo</code> instruction. Given that Account B shares the same owner and the same fields as Account A, how can the program detect this mistake and throw an error?</p>
+<p>This is where the discriminator comes into play. It uniquely identifies the type of an account. Even though Account A and Account B are structurally identical and share the same owner, they have different discriminators.</p>
+<p>When the <code>foo</code> instruction gets executed, the Anchor framework checks the discriminator of the account passed as an argument. If you have declared <code>foo</code> as <code>foo: Account&lt;'info, A&gt;</code>, Anchor will make sure that the passed account's discriminator matches that of Account A. If the discriminators don't match (as would be the case if Account B was passed), Anchor raises an error, preventing any unintended effects on Account B.</p>
+<p>The discriminator helps Anchor to ensure that the account being processed is indeed the one expected, preventing type-related errors at runtime. This mechanism is automatically handled when you use the <code>Account</code> type in Anchor, adding an extra layer of security to your program.</p>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>In conclusion, discriminators in Anchor play an essential role in managing and distinguishing between various types of data and account structures. They serve as unique identifiers, enabling the Anchor framework to handle data correctly during runtime. The discriminator ensures that each is treated as a distinct entity, thereby preventing any inadvertent account manipulations. This mechanism greatly enhances the robustness and security of your programs, providing reassurance that potential type-related errors are kept to a minimum.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../anchor_in_depth/events.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../anchor_references/anchor_references.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../anchor_in_depth/events.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../anchor_references/anchor_references.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

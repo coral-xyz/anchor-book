@@ -1,0 +1,312 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Intro to Solana - The Anchor Book v0.29.0</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../introduction/what_is_anchor.html"><strong aria-hidden="true">1.1.</strong> What is Anchor</a></li><li class="chapter-item expanded "><a href="../introduction/anchor_documentation.html"><strong aria-hidden="true">1.2.</strong> Anchor Documentation</a></li></ol></li><li class="chapter-item expanded "><a href="../prerequisites/prerequisites.html"><strong aria-hidden="true">2.</strong> Prerequisites</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../prerequisites/useful_resources.html"><strong aria-hidden="true">2.1.</strong> Useful Resources</a></li><li class="chapter-item expanded "><a href="../prerequisites/intro_to_solana.html" class="active"><strong aria-hidden="true">2.2.</strong> Intro to Solana</a></li></ol></li><li class="chapter-item expanded "><a href="../getting_started/getting_started.html"><strong aria-hidden="true">3.</strong> Getting Started</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting_started/installation.html"><strong aria-hidden="true">3.1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../getting_started/hello_anchor.html"><strong aria-hidden="true">3.2.</strong> Hello, Anchor!</a></li></ol></li><li class="chapter-item expanded "><a href="../anchor_in_depth/anchor_programs_in-depth.html"><strong aria-hidden="true">4.</strong> Anchor Programs In-Depth</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/essentials.html"><strong aria-hidden="true">4.1.</strong> Essentials</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/high-level_overview.html"><strong aria-hidden="true">4.1.1.</strong> High-level Overview</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/the_accounts_struct.html"><strong aria-hidden="true">4.1.2.</strong> The Accounts Struct</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/the_program_module.html"><strong aria-hidden="true">4.1.3.</strong> The Program Module</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/errors.html"><strong aria-hidden="true">4.1.4.</strong> Errors</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/milestone_project_tic-tac-toe.html"><strong aria-hidden="true">4.1.5.</strong> Milestone Project - Tic-Tac-Toe</a></li></ol></li><li class="chapter-item expanded "><a href="../anchor_in_depth/intermediate.html"><strong aria-hidden="true">4.2.</strong> Intermediate</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/CPIs.html"><strong aria-hidden="true">4.2.1.</strong> Cross-Program Invocations</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/PDAs.html"><strong aria-hidden="true">4.2.2.</strong> PDAs</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/events.html"><strong aria-hidden="true">4.2.3.</strong> Events</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.4.</strong> Constants</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.5.</strong> Zero-Copy</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.6.</strong> Access Control</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.7.</strong> Building &amp; Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.8.</strong> Milestone Project - The Nightclub</div></li></ol></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> Anchor BTS</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_bts/discriminator.html"><strong aria-hidden="true">5.1.</strong> The Discriminator</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.2.</strong> Dispatch</div></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../anchor_references/anchor_references.html"><strong aria-hidden="true">6.</strong> Anchor References</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_references/space.html"><strong aria-hidden="true">6.1.</strong> Space Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/javascript_anchor_types_reference.html"><strong aria-hidden="true">6.2.</strong> Javascript Anchor Types Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/cli.html"><strong aria-hidden="true">6.3.</strong> CLI Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/avm.html"><strong aria-hidden="true">6.4.</strong> AVM Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/anchor-toml_reference.html"><strong aria-hidden="true">6.5.</strong> Anchor.toml Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/reference_links.html"><strong aria-hidden="true">6.6.</strong> Code References</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Anchor Book v0.29.0</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="intro-to-programming-on-solana"><a class="header" href="#intro-to-programming-on-solana">Intro to Programming on Solana</a></h1>
+<p>This is a brief intro to programming on Solana that explains the most important topics.
+It aims to provide everything you need to understand the following chapters in the book.</p>
+<h2 id="memory-on-solana"><a class="header" href="#memory-on-solana">Memory on Solana</a></h2>
+<p>On a high level, memory inside a Solana cluster can be thought of as a monolithic heap of data. Smart contracts on Solana (&quot;programs&quot; in Solana jargon) each have access to their own part of that heap.</p>
+<p>While a program may read any part of the global heap, if a program tries to write to a part of the heap that is not theirs, the Solana runtime makes the transaction fail (there is one exception to this which is increasing the balance of an account).</p>
+<p>All state lives in this heap. Your SOL accounts, smart contracts, and memory used by smart contracts. And each memory region has a program that manages it (sometimes called the “owner”). The solana term for a memory region is &quot;account&quot;. Some programs own thousands of independent accounts. As shown in the figure, these accounts (even when owned by the same program) do not have to be equal in size.</p>
+<div style="text-align: center">
+<p><img src="../images/heap_segment.svg" alt="Heap Segment" /></p>
+</div>
+<p>Since all state lives in the heap, even programs themselves live there. Accounts that store programs are owned by the <code>BPFLoader</code>. This is a program that can be used to deploy and upgrade other programs. The <code>BPFLoader</code> is owned by the <code>Native Loader</code> and that is where the recursion ends.</p>
+<h2 id="transactions-and-accounts"><a class="header" href="#transactions-and-accounts">Transactions and Accounts</a></h2>
+<p>You can make a program read and write data by sending transactions. Programs provide endpoints that can be called via transactions (In reality it's a bit more complex than that but frameworks like Anchor abstract away this complexity). A function signature usually takes the following arguments:</p>
+<ul>
+<li>the accounts that the program may read from and write to during this transaction.</li>
+<li>additional data specific to the function</li>
+</ul>
+<p>The first point means that even if in theory the program may read and write to a large part of the global heap, in the context of a transaction, it may only read from and write to the specific regions specified in the arguments of the transaction.</p>
+<blockquote>
+<p>This design is partly responsible for Solana’s high throughput. The runtime can look at all the incoming transactions of a program (and even across programs) and can check whether the memory regions in the first argument of the transactions overlap. If they don’t, the runtime can run these transactions in parallel because they don’t conflict with each other. Even better, if the runtime sees that two transactions access overlapping memory regions but only read and don’t write, it can also parallelize those transactions because they do not conflict with each other.</p>
+</blockquote>
+<p>How exactly can a transaction specify a memory region/account? To answer that, we need to look deeper into what properties an account has (<a href="https://docs.rs/solana-program/latest/solana_program/account_info/struct.AccountInfo.html">docs here</a>. This is the data structure for an account in a transaction. The <code>is_signer</code> and <code>is_writable</code> fields are set per transaction (e.g. <code>is_signed</code> is set if the corresponding private key of the account's <code>key</code> field signed the transaction) and are not part of the metadata that is saved in the heap). In front of the user data that the account can store (in the <code>data</code> field) , there is some metadata connected to each account. First, it has a key property which is a ed25519 public key and serves as the address of the account. This is how the transaction can specify which accounts the program may access in the transaction.</p>
+<div style="text-align: center">
+<p><img src="../images/transaction.svg" alt="Transaction" /></p>
+</div>
+<p>An account also has a lamports field (a lamport is SOL’s smallest unit). Since all state lives in the heap, normal SOL accounts are on the heap too. They're accounts with a <code>data</code> field of length 0 (they still have metadata though!) and some amount of lamports. The System Program owns all regular SOL accounts. </p>
+<h2 id="rent"><a class="header" href="#rent">Rent</a></h2>
+<p>Because validators don’t have infinite storage and providing storage costs money, accounts need to pay rent for their existence. This rent is subtracted from their lamports regularly. However, if an account's lamports balance is above the rent-exemption threshold, it is rent-exempt and does not lose its lamports. This threshold depends on the size of the account. In 99% of cases, you will create rent-exempt accounts. It's even being considered to disable non-rent-exempt accounts.</p>
+<h2 id="program-example-the-system-program"><a class="header" href="#program-example-the-system-program">Program Example: The System Program</a></h2>
+<p>Let’s now look at an example of a program: The System Program. The System Program is a smart contract with some additional privileges.</p>
+<p>All &quot;normal&quot; SOL accounts are owned by the System Program. One of the system program’s responsibilities is handling transfers between the accounts it owns. This is worth repeating: Even normal SOL transfers on Solana are handled by a smart contract.</p>
+<p>To provide transfer functionality, the system program has a “transfer” endpoint. This endpoint takes 2 accounts - from and to - and a “lamports” argument. The system program checks whether <code>from</code> signed the transaction via the <code>is_signer</code> field on the <code>from</code> account. The runtime will set this flag to <code>true</code> if the private key of the keypair that the account’s public key belongs to signed the transaction. If “from” signed the transaction, the system program removes lamports from <code>from</code>’s account and adds them to <code>to</code>’s account.</p>
+<pre><code class="language-ignore">/// simplified system program code
+
+fn transfer(accounts, lamports) {
+    if !accounts.from.is_signer {
+        error();
+    }
+    accounts.from.lamports -= lamports;
+    accounts.to.lamports += lamports;
+}
+</code></pre>
+<p>Take a moment to guess would happen if the user passed in a <code>from</code> account that was not owned by the system program!</p>
+<p>...</p>
+<p>...</p>
+<p>The transaction would fail! A program may not write to any accounts that it doesn't own. There's one exception to this rule though.
+If the <code>to</code> account was owned by a different program, the transaction would still succeed. This is because programs may increase the lamports of an account even if they do not own it.</p>
+<p>Next to transferring lamports, the system program is used to create accounts for other programs. An account is created with a specific size and a specific amount of lamports. Let's now look at program composition to see how creating accounts works in practice.</p>
+<h2 id="program-composition"><a class="header" href="#program-composition">Program Composition</a></h2>
+<p>There are two ways for developers to make programs interact with each other. To explain these, we'll use a common flow on Solana: Create &amp; Initialize. </p>
+<p>Consider a counter program with two endpoints. One to initialize the counter and one to increment it. To create a new counter, we call the system program's <code>create_account</code> to create the account in memory and then the counter's <code>initialize</code> function.</p>
+<h3 id="program-composition-via-multiple-instructions-in-a-transaction"><a class="header" href="#program-composition-via-multiple-instructions-in-a-transaction">Program Composition via multiple instructions in a transaction</a></h3>
+<p>The first way to create and initialize the counter is by using multiple instructions in a transaction.
+While a transaction can be used to execute a single call to a program like it was done above with <code>transfer</code>,
+a single transaction can also include multiple calls to different programs.</p>
+<p><img src="../images/create_initialize_multiple_ix.svg" alt="create &amp; initialize using multiple instructions in a transaction" /></p>
+<p>If we went with this approach, our counter data structure would look like this:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Counter {
+    pub count: u64,
+    pub is_initialized: bool
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>and our <code>initialize</code> function would look like this:</p>
+<pre><code class="language-ignore">/// pseudo code
+fn initialize(accounts) {
+    let counter = deserialize(accounts.counter);
+    if counter.is_initialized {
+        error(&quot;already initialized&quot;);
+    }
+    counter.count = 0;
+    counter.is_initialized = true;
+}
+</code></pre>
+<p>This approach could also be called the &quot;implicit&quot; approach. This is because the programs do not explicitly communicate with each other. They are glued together by the user on the client side.</p>
+<p>This also means that the counter needs to have an <code>is_initialized</code> variable so <code>initialize</code> can only be called once per counter account.</p>
+<h3 id="program-composition-via-cross-program-invocations"><a class="header" href="#program-composition-via-cross-program-invocations">Program Composition via Cross-Program Invocations</a></h3>
+<p>Cross-Program Invocations (CPIs) are the explicit tool to compose programs. A CPI is a direct call from one program into another within the same instruction.</p>
+<p>Using CPIs the create &amp; initialize flow can be executed inside the <code>initialize</code> function of the counter:</p>
+<pre><code class="language-ignore">/// pseudo code
+fn initialize(accounts) {
+    accounts.system_program.create_account(accounts.payer, accounts.counter);
+    let counter = deserialize(accounts.counter);
+    counter.count = 0;
+}
+</code></pre>
+<p>In this example, no <code>is_initialized</code> is needed. This is because the CPI to the system program will fail if the counter exists already.</p>
+<p>Anchor recommends CPIs to create and initialize accounts when possible (Accounts that are created by CPI can only be created with a maximum size of <code>10</code> kibibytes. This is large enough for most use cases though.). This is because creating an account inside your own instruction means that you can be certain about its properties. Any account that you don't create yourself is passed in by some other program or user that cannot be trusted. This brings us to the next section.</p>
+<h3 id="validating-inputs"><a class="header" href="#validating-inputs">Validating Inputs</a></h3>
+<p>On Solana it is crucial to validate program inputs. Clients pass accounts and program inputs to programs which means that malicious clients can pass malicious accounts and inputs. Programs need to be written in a way that handles those malicious inputs.</p>
+<p>Consider the transfer function in the system program for example. It checks that <code>from</code> has signed the transaction.</p>
+<pre><code class="language-ignore">/// simplified system program code
+
+fn transfer(accounts, lamports) {
+    if !accounts.from.is_signer {
+        error();
+    }
+    accounts.from.lamports -= lamports;
+    accounts.to.lamports += lamports;
+}
+</code></pre>
+<p>If it didn't do that, anyone could call the endpoint with your account and make the system program transfer the lamports from your account into theirs.</p>
+<p>The book will eventually have a chapter explaining all the different types of attacks and how anchor prevents them but for now here's one more example. Consider the counter program from earlier. Now imagine that next to the counter struct, there's another struct that is a singleton which is used to count how many counters there are.</p>
+<pre><code class="language-rust ignore">struct CounterCounter {
+    count: u64
+}
+</code></pre>
+<p>Every time a new counter is created, the <code>count</code> variable of the counter counter should be incremented by one.</p>
+<p>Consider the following <code>increment</code> instruction that increases the value of a counter account:</p>
+<pre><code class="language-ignore">/// pseudo code
+fn increment(accounts) {
+    let counter = deserialize(accounts.counter);
+    counter.count += 1;
+}
+</code></pre>
+<p>This function is insecure. But why? It's not possible to pass in an account owned by a different program because the function writes to the account so the runtime would make the transaction fail. But it is possible to pass in the counter counter singleton account because both the counter and the counter counter struct have the same structure (they're a rust struct with a single <code>u64</code> variable). This would then increase the counter counter's count and it would no longer track how many counters there are.</p>
+<p>The fix is simple:</p>
+<pre><code class="language-ignore">/// pseudo code
+
+// a better approach than hardcoding the address is using a PDA.
+// We will cover those later in the book.
+let HARDCODED_COUNTER_COUNTER_ADDRESS = SOME_ADDRESS;
+
+fn increment(accounts) {
+    if accounts.counter.key == HARDCODED_COUNTER_COUNTER_ADDRESS {
+        error(&quot;Wrong account type&quot;);
+    }
+    let counter = deserialize(accounts.counter);
+    counter.count += 1;
+}
+</code></pre>
+<p>There are many types of attacks possible on Solana that all revolve around passing in one account where another was expected but it wasn't checked that the actual one is really the expected one. This brings us from Solana to Anchor. A big part of Anchor's raison d'être is making input validation easier or even doing it for you when possible (e.g. with idiomatic anchor, this account type confusion cannot happen thanks to anchor's discriminator which we'll cover later in the book).</p>
+<p>Let's dive in.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../prerequisites/useful_resources.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../getting_started/getting_started.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../prerequisites/useful_resources.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../getting_started/getting_started.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
