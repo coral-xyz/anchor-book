@@ -123,7 +123,7 @@ pub mod game {
             panic!();
         }
         user_stats.name = name;
-        user_stats.bump = ctx.bumps.user_stats
+        user_stats.bump = ctx.bumps.user_stats;
         Ok(())
     }
 }
