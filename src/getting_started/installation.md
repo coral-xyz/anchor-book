@@ -58,7 +58,9 @@ cargo install --git https://github.com/coral-xyz/anchor --tag v0.29.0 anchor-cli
 On Linux systems you may need to install additional dependencies if cargo install fails. On Ubuntu,
 
 ```
-sudo apt-get update && sudo apt-get upgrade && sudo apt-get install -y pkg-config build-essential libudev-dev
+sudo apt-get update && \
+sudo apt-get upgrade && \
+sudo apt-get install -y pkg-config build-essential libudev-dev libssl-dev
 ```
 
 Now verify the CLI is installed properly.
