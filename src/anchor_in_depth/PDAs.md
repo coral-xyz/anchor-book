@@ -271,7 +271,8 @@ mod puppet_master {
         puppet::cpi::set_data(
             ctx.accounts.set_data_ctx().with_signer(&[&[bump][..]]),
             data,
-        )
+        )?;
+        Ok(())
     }
 }
 
