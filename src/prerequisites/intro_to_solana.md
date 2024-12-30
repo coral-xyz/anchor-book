@@ -22,6 +22,7 @@ Since all state lives in the heap, even programs themselves live there. Accounts
 ## Transactions and Accounts
 
 You can make a program read and write data by sending transactions. Programs provide endpoints that can be called via transactions (In reality it's a bit more complex than that but frameworks like Anchor abstract away this complexity). A function signature usually takes the following arguments:
+
 - the accounts that the program may read from and write to during this transaction.
 - additional data specific to the function
 
@@ -29,7 +30,7 @@ The first point means that even if in theory the program may read and write to a
 
 > This design is partly responsible for Solana’s high throughput. The runtime can look at all the incoming transactions of a program (and even across programs) and can check whether the memory regions in the first argument of the transactions overlap. If they don’t, the runtime can run these transactions in parallel because they don’t conflict with each other. Even better, if the runtime sees that two transactions access overlapping memory regions but only read and don’t write, it can also parallelize those transactions because they do not conflict with each other.
 
-How exactly can a transaction specify a memory region/account? To answer that, we need to look deeper into what properties an account has ([docs here](https://docs.rs/solana-program/latest/solana_program/account_info/struct.AccountInfo.html). This is the data structure for an account in a transaction. The `is_signer` and `is_writable` fields are set per transaction (e.g. `is_signed` is set if the corresponding private key of the account's `key` field signed the transaction) and are not part of the metadata that is saved in the heap). In front of the user data that the account can store (in the `data` field) , there is some metadata connected to each account. First, it has a key property which is a ed25519 public key and serves as the address of the account. This is how the transaction can specify which accounts the program may access in the transaction.
+How exactly can a transaction specify a memory region/account? To answer that, we need to look deeper into what properties an account has ([docs here](https://docs.rs/solana-program/1.17.0/solana_program/account_info/struct.AccountInfo.html). This is the data structure for an account in a transaction. The `is_signer` and `is_writable` fields are set per transaction (e.g. `is_signed` is set if the corresponding private key of the account's `key` field signed the transaction) and are not part of the metadata that is saved in the heap). In front of the user data that the account can store (in the `data` field) , there is some metadata connected to each account. First, it has a key property which is a ed25519 public key and serves as the address of the account. This is how the transaction can specify which accounts the program may access in the transaction.
 
 <div style="text-align: center">
 
@@ -37,7 +38,7 @@ How exactly can a transaction specify a memory region/account? To answer that, w
 
 </div>
 
-An account also has a lamports field (a lamport is SOL’s smallest unit). Since all state lives in the heap, normal SOL accounts are on the heap too. They're accounts with a `data` field of length 0 (they still have metadata though!) and some amount of lamports. The System Program owns all regular SOL accounts. 
+An account also has a lamports field (a lamport is SOL’s smallest unit). Since all state lives in the heap, normal SOL accounts are on the heap too. They're accounts with a `data` field of length 0 (they still have metadata though!) and some amount of lamports. The System Program owns all regular SOL accounts.
 
 ## Rent
 
@@ -76,7 +77,7 @@ Next to transferring lamports, the system program is used to create accounts for
 
 ## Program Composition
 
-There are two ways for developers to make programs interact with each other. To explain these, we'll use a common flow on Solana: Create & Initialize. 
+There are two ways for developers to make programs interact with each other. To explain these, we'll use a common flow on Solana: Create & Initialize.
 
 Consider a counter program with two endpoints. One to initialize the counter and one to increment it. To create a new counter, we call the system program's `create_account` to create the account in memory and then the counter's `initialize` function.
 
@@ -89,6 +90,7 @@ a single transaction can also include multiple calls to different programs.
 ![create & initialize using multiple instructions in a transaction](../images/create_initialize_multiple_ix.svg)
 
 If we went with this approach, our counter data structure would look like this:
+
 ```rust
 pub struct Counter {
     pub count: u64,

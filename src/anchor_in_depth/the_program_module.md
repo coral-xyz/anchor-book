@@ -1,4 +1,5 @@
 # The Program Module
+
 The program module is where you define your business logic. You do so by writing functions which can be called by clients or other programs. You've already seen one example of such a function, the `set_data` function from the previous section.
 
 ```rust,ignore
@@ -16,7 +17,7 @@ mod hello_anchor {
 
 ## Context
 
-> [Context Reference](https://docs.rs/anchor-lang/latest/anchor_lang/context/index.html)
+> [Context Reference](https://docs.rs/anchor-lang/0.29.0/anchor_lang/context/index.html)
 
 Each endpoint function takes a `Context` type as its first argument. Through this context argument it can access the accounts (`ctx.accounts`), the program id (`ctx.program_id`) of the executing program, and the remaining accounts (`ctx.remaining_accounts`). `remaining_accounts` is a vector that contains all accounts that were passed into the instruction but are not declared in the `Accounts` struct. This is useful when you want your function to handle a variable amount of accounts, e.g. when initializing a game with a variable number of players.
 

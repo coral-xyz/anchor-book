@@ -37,7 +37,7 @@ fn find_pda(seeds, program_id) {
 ```
 
 It is technically possible that no bump is found within 256 tries but this probability is negligible.
-If you're interested in the exact calculation of a PDA, check out the [`solana_program` source code](https://docs.rs/solana-program/latest/solana_program/pubkey/struct.Pubkey.html#method.find_program_address).
+If you're interested in the exact calculation of a PDA, check out the [`solana_program` source code](https://docs.rs/solana-program/1.17.0/solana_program/pubkey/struct.Pubkey.html#method.find_program_address).
 
 The first bump that results in a PDA is commonly called the "canonical bump". Other bumps may also result in a PDA but it's recommended to only use the canonical bump to avoid confusion.
 
