@@ -4,13 +4,13 @@ The Accounts struct is where you define which accounts your instruction expects 
 
 ## Types
 
-> [Account Types Reference](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/index.html)
+> [Account Types Reference](https://docs.rs/anchor-lang/0.29.0/anchor_lang/accounts/index.html)
 
-Each type has a specific use case in mind. Detailed explanations for the types can be found in the [reference](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/index.html). We will briefly explain the most important type here, the `Account` type.
+Each type has a specific use case in mind. Detailed explanations for the types can be found in the [reference](https://docs.rs/anchor-lang/0.29.0/anchor_lang/accounts/index.html). We will briefly explain the most important type here, the `Account` type.
 
 ### The Account Type
 
-> [Account Reference](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account/struct.Account.html)
+> [Account Reference](https://docs.rs/anchor-lang/0.29.0/anchor_lang/accounts/account/struct.Account.html)
 
 The `Account` type is used when an instruction is interested in the deserialized data of the account. Consider the following example where we set some data in an account:
 
@@ -91,11 +91,11 @@ To run this example, add `anchor-spl = "<version>"` to the dependencies section 
 In this example, we set the `data` field of an account if the caller has admin rights. We decide whether the caller is an admin by checking whether they own admin tokens for the account they want to change. We do most of this via constraints which we will look at in the next section.
 The important thing to take away is that we use the `TokenAccount` type (that wraps around the token program's `Account` struct and adds the required functions) to make anchor ensure that the incoming account is owned by the token program and to make anchor deserialize it. This means we can use the `TokenAccount` properties inside our constraints (e.g. `token_account.mint`) as well as in the instruction function.
 
-Check out the [reference for the Account type](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account/struct.Account.html) to learn how to implement your own wrapper types for non-anchor programs.
+Check out the [reference for the Account type](https://docs.rs/anchor-lang/0.29.0/anchor_lang/accounts/account/struct.Account.html) to learn how to implement your own wrapper types for non-anchor programs.
 
 ## Constraints
 
-> [Constraints reference](https://docs.rs/anchor-lang/latest/anchor_lang/derive.Accounts.html)
+> [Constraints reference](https://docs.rs/anchor-lang/0.29.0/anchor_lang/derive.Accounts.html)
 
 Account types can do a lot of work for you but they're not dynamic enough to handle all the security checks a secure program requires.
 
@@ -133,7 +133,7 @@ You can find information about all constraints in the reference. We will cover s
 
 ## Safety checks
 
-Two of the Anchor account types, [AccountInfo](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/account_info/index.html) and [UncheckedAccount](https://docs.rs/anchor-lang/latest/anchor_lang/accounts/unchecked_account/index.html) do not implement any checks on the account being passed. Anchor implements safety checks that encourage additional documentation describing why additional checks are not necessary.
+Two of the Anchor account types, [AccountInfo](https://docs.rs/anchor-lang/0.29.0/anchor_lang/accounts/account_info/index.html) and [UncheckedAccount](https://docs.rs/anchor-lang/0.29.0/anchor_lang/accounts/unchecked_account/index.html) do not implement any checks on the account being passed. Anchor implements safety checks that encourage additional documentation describing why additional checks are not necessary.
 
 Attempting to build a program containing the following excerpt with `anchor build`:
 
