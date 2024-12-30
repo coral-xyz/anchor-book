@@ -1,0 +1,533 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cross-Program Invocations - The Anchor Book v0.29.0</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction/introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../introduction/what_is_anchor.html"><strong aria-hidden="true">1.1.</strong> What is Anchor</a></li><li class="chapter-item expanded "><a href="../introduction/anchor_documentation.html"><strong aria-hidden="true">1.2.</strong> Anchor Documentation</a></li></ol></li><li class="chapter-item expanded "><a href="../prerequisites/prerequisites.html"><strong aria-hidden="true">2.</strong> Prerequisites</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../prerequisites/useful_resources.html"><strong aria-hidden="true">2.1.</strong> Useful Resources</a></li><li class="chapter-item expanded "><a href="../prerequisites/intro_to_solana.html"><strong aria-hidden="true">2.2.</strong> Intro to Solana</a></li></ol></li><li class="chapter-item expanded "><a href="../getting_started/getting_started.html"><strong aria-hidden="true">3.</strong> Getting Started</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting_started/installation.html"><strong aria-hidden="true">3.1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../getting_started/hello_anchor.html"><strong aria-hidden="true">3.2.</strong> Hello, Anchor!</a></li></ol></li><li class="chapter-item expanded "><a href="../anchor_in_depth/anchor_programs_in-depth.html"><strong aria-hidden="true">4.</strong> Anchor Programs In-Depth</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/essentials.html"><strong aria-hidden="true">4.1.</strong> Essentials</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/high-level_overview.html"><strong aria-hidden="true">4.1.1.</strong> High-level Overview</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/the_accounts_struct.html"><strong aria-hidden="true">4.1.2.</strong> The Accounts Struct</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/the_program_module.html"><strong aria-hidden="true">4.1.3.</strong> The Program Module</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/errors.html"><strong aria-hidden="true">4.1.4.</strong> Errors</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/milestone_project_tic-tac-toe.html"><strong aria-hidden="true">4.1.5.</strong> Milestone Project - Tic-Tac-Toe</a></li></ol></li><li class="chapter-item expanded "><a href="../anchor_in_depth/intermediate.html"><strong aria-hidden="true">4.2.</strong> Intermediate</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_in_depth/CPIs.html" class="active"><strong aria-hidden="true">4.2.1.</strong> Cross-Program Invocations</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/PDAs.html"><strong aria-hidden="true">4.2.2.</strong> PDAs</a></li><li class="chapter-item expanded "><a href="../anchor_in_depth/events.html"><strong aria-hidden="true">4.2.3.</strong> Events</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.4.</strong> Constants</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.5.</strong> Zero-Copy</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.6.</strong> Access Control</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.7.</strong> Building &amp; Testing</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.8.</strong> Milestone Project - The Nightclub</div></li></ol></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> Anchor BTS</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_bts/discriminator.html"><strong aria-hidden="true">5.1.</strong> The Discriminator</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.2.</strong> Dispatch</div></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../anchor_references/anchor_references.html"><strong aria-hidden="true">6.</strong> Anchor References</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../anchor_references/space.html"><strong aria-hidden="true">6.1.</strong> Space Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/javascript_anchor_types_reference.html"><strong aria-hidden="true">6.2.</strong> Javascript Anchor Types Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/cli.html"><strong aria-hidden="true">6.3.</strong> CLI Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/avm.html"><strong aria-hidden="true">6.4.</strong> AVM Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/anchor-toml_reference.html"><strong aria-hidden="true">6.5.</strong> Anchor.toml Reference</a></li><li class="chapter-item expanded "><a href="../anchor_references/reference_links.html"><strong aria-hidden="true">6.6.</strong> Code References</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Anchor Book v0.29.0</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="cross-program-invocations"><a class="header" href="#cross-program-invocations">Cross-Program Invocations</a></h1>
+<p>Often it's useful for programs to interact with each other. In Solana this is achieved via Cross-Program Invocations (CPIs).</p>
+<p>Consider the following example of a puppet and a puppet master. Admittedly, it is not very realistic but it allows us to show you the many nuances of CPIs. The milestone project of the intermediate section covers a more realistic program with multiple CPIs.</p>
+<h2 id="setting-up-basic-cpi-functionality"><a class="header" href="#setting-up-basic-cpi-functionality">Setting up basic CPI functionality</a></h2>
+<p>Create a new workspace</p>
+<pre><code>anchor init puppet
+</code></pre>
+<p>and copy the following code.</p>
+<pre><code class="language-rust ignore">use anchor_lang::prelude::*;
+
+declare_id!(&quot;Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS&quot;);
+
+#[program]
+pub mod puppet {
+    use super::*;
+    pub fn initialize(_ctx: Context&lt;Initialize&gt;) -&gt; Result&lt;()&gt; {
+        Ok(())
+    }
+
+    pub fn set_data(ctx: Context&lt;SetData&gt;, data: u64) -&gt; Result&lt;()&gt; {
+        let puppet = &amp;mut ctx.accounts.puppet;
+        puppet.data = data;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct Initialize&lt;'info&gt; {
+    #[account(init, payer = user, space = 8 + 8)]
+    pub puppet: Account&lt;'info, Data&gt;,
+    #[account(mut)]
+    pub user: Signer&lt;'info&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}
+
+#[derive(Accounts)]
+pub struct SetData&lt;'info&gt; {
+    #[account(mut)]
+    pub puppet: Account&lt;'info, Data&gt;,
+}
+
+#[account]
+pub struct Data {
+    pub data: u64,
+}
+</code></pre>
+<p>There's nothing special happening here. It's a pretty simple program! The interesting part is how it interacts with the next program we are going to create.</p>
+<p>Run</p>
+<pre><code>anchor new puppet-master
+</code></pre>
+<p>inside the workspace and copy the following code:</p>
+<pre><code class="language-rust ignore">use anchor_lang::prelude::*;
+use puppet::cpi::accounts::SetData;
+use puppet::program::Puppet;
+use puppet::{self, Data};
+
+declare_id!(&quot;HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L&quot;);
+
+#[program]
+mod puppet_master {
+    use super::*;
+    pub fn pull_strings(ctx: Context&lt;PullStrings&gt;, data: u64) -&gt; Result&lt;()&gt; {
+        let cpi_program = ctx.accounts.puppet_program.to_account_info();
+        let cpi_accounts = SetData {
+            puppet: ctx.accounts.puppet.to_account_info(),
+        };
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        puppet::cpi::set_data(cpi_ctx, data)
+    }
+}
+
+#[derive(Accounts)]
+pub struct PullStrings&lt;'info&gt; {
+    #[account(mut)]
+    pub puppet: Account&lt;'info, Data&gt;,
+    pub puppet_program: Program&lt;'info, Puppet&gt;,
+}
+</code></pre>
+<p>Also add the line <code>puppet_master = &quot;HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L&quot;</code> in the <code>[programs.localnet]</code> section of your <code>Anchor.toml</code>. Finally, import the puppet program into the puppet-master program by adding the following line to the <code>[dependencies]</code> section of the <code>Cargo.toml</code> file inside the <code>puppet-master</code> program folder:</p>
+<pre><code class="language-toml">puppet = { path = &quot;../puppet&quot;, features = [&quot;cpi&quot;]}
+</code></pre>
+<p>The <code>features = [&quot;cpi&quot;]</code> is used so we can not only use puppet's types but also its instruction builders and cpi functions. Without those, we would have to use low level solana syscalls. Fortunately, anchor provides abstractions on top of those. By enabling the <code>cpi</code> feature, the puppet-master program gets access to the <code>puppet::cpi</code> module. Anchor generates this module automatically and it contains tailor-made instructions builders and cpi helpers for the program.</p>
+<p>In the case of the puppet program, the puppet-master uses the <code>SetData</code> instruction builder struct provided by the <code>puppet::cpi::accounts</code> module to submit the accounts the <code>SetData</code> instruction of the puppet program expects. Then, the puppet-master creates a new cpi context and passes it to the <code>puppet::cpi::set_data</code> cpi function. This function has the exact same function as the <code>set_data</code> function in the puppet program with the exception that it expects a <code>CpiContext</code> instead of a <code>Context</code>.</p>
+<p>Setting up a CPI can distract from the business logic of the program so it's recommended to move the CPI setup into the <code>impl</code> block of the instruction. The puppet-master program then looks like this:</p>
+<pre><code class="language-rust ignore">use anchor_lang::prelude::*;
+use puppet::cpi::accounts::SetData;
+use puppet::program::Puppet;
+use puppet::{self, Data};
+
+declare_id!(&quot;HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L&quot;);
+
+#[program]
+mod puppet_master {
+    use super::*;
+    pub fn pull_strings(ctx: Context&lt;PullStrings&gt;, data: u64) -&gt; Result&lt;()&gt; {
+        puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)
+    }
+}
+
+#[derive(Accounts)]
+pub struct PullStrings&lt;'info&gt; {
+    #[account(mut)]
+    pub puppet: Account&lt;'info, Data&gt;,
+    pub puppet_program: Program&lt;'info, Puppet&gt;,
+}
+
+impl&lt;'info&gt; PullStrings&lt;'info&gt; {
+    pub fn set_data_ctx(&amp;self) -&gt; CpiContext&lt;'_, '_, '_, 'info, SetData&lt;'info&gt;&gt; {
+        let cpi_program = self.puppet_program.to_account_info();
+        let cpi_accounts = SetData {
+            puppet: self.puppet.to_account_info()
+        };
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+</code></pre>
+<p>We can verify that everything works as expected by replacing the contents of the <code>puppet.ts</code> file with:</p>
+<pre><code class="language-ts">import * as anchor from &quot;@coral-xyz/anchor&quot;;
+import { Program } from &quot;@coral-xyz/anchor&quot;;
+import { Keypair } from &quot;@solana/web3.js&quot;;
+import { expect } from &quot;chai&quot;;
+import { Puppet } from &quot;../target/types/puppet&quot;;
+import { PuppetMaster } from &quot;../target/types/puppet_master&quot;;
+
+describe(&quot;puppet&quot;, () =&gt; {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const puppetProgram = anchor.workspace.Puppet as Program&lt;Puppet&gt;;
+  const puppetMasterProgram = anchor.workspace
+    .PuppetMaster as Program&lt;PuppetMaster&gt;;
+
+  const puppetKeypair = Keypair.generate();
+
+  it(&quot;Does CPI!&quot;, async () =&gt; {
+    await puppetProgram.methods
+      .initialize()
+      .accounts({
+        puppet: puppetKeypair.publicKey,
+        user: provider.wallet.publicKey,
+      })
+      .signers([puppetKeypair])
+      .rpc();
+
+    await puppetMasterProgram.methods
+      .pullStrings(new anchor.BN(42))
+      .accounts({
+        puppetProgram: puppetProgram.programId,
+        puppet: puppetKeypair.publicKey,
+      })
+      .rpc();
+
+    expect(
+      (
+        await puppetProgram.account.data.fetch(puppetKeypair.publicKey)
+      ).data.toNumber()
+    ).to.equal(42);
+  });
+});
+</code></pre>
+<p>and running <code>anchor test</code>.</p>
+<h2 id="privilege-extension"><a class="header" href="#privilege-extension">Privilege Extension</a></h2>
+<p>CPIs extend the privileges of the caller to the callee. The puppet account was passed as a mutable account to the puppet-master but it was still mutable in the puppet program as well (otherwise the <code>expect</code> in the test would've failed). The same applies to signatures.</p>
+<p>If you want to prove this for yourself, add an <code>authority</code> field to the <code>Data</code> struct in the puppet program.</p>
+<pre><code class="language-rust ignore">#[account]
+pub struct Data {
+    pub data: u64,
+    pub authority: Pubkey
+}
+</code></pre>
+<p>and adjust the <code>initialize</code> function:</p>
+<pre><code class="language-rust ignore">pub fn initialize(ctx: Context&lt;Initialize&gt;, authority: Pubkey) -&gt; Result&lt;()&gt; {
+    ctx.accounts.puppet.authority = authority;
+    Ok(())
+}
+</code></pre>
+<p>Add <code>32</code> to the <code>space</code> constraint of the <code>puppet</code> field for the <code>Pubkey</code> field in the <code>Data</code> struct.</p>
+<pre><code class="language-rust ignore">#[derive(Accounts)]
+pub struct Initialize&lt;'info&gt; {
+    #[account(init, payer = user, space = 8 + 8 + 32)]
+    pub puppet: Account&lt;'info, Data&gt;,
+    #[account(mut)]
+    pub user: Signer&lt;'info&gt;,
+    pub system_program: Program&lt;'info, System&gt;,
+}
+</code></pre>
+<p>Then, adjust the <code>SetData</code> validation struct:</p>
+<pre><code class="language-rust ignore">#[derive(Accounts)]
+pub struct SetData&lt;'info&gt; {
+    #[account(mut, has_one = authority)]
+    pub puppet: Account&lt;'info, Data&gt;,
+    pub authority: Signer&lt;'info&gt;
+}
+</code></pre>
+<p>The <code>has_one</code> constraint checks that <code>puppet.authority = authority.key()</code>.</p>
+<p>The puppet-master program now also needs adjusting:</p>
+<pre><code class="language-rust ignore">use anchor_lang::prelude::*;
+use puppet::cpi::accounts::SetData;
+use puppet::program::Puppet;
+use puppet::{self, Data};
+
+declare_id!(&quot;HmbTLCmaGvZhKnn1Zfa1JVnp7vkMV4DYVxPLWBVoN65L&quot;);
+
+#[program]
+mod puppet_master {
+    use super::*;
+    pub fn pull_strings(ctx: Context&lt;PullStrings&gt;, data: u64) -&gt; Result&lt;()&gt; {
+        puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)
+    }
+}
+
+#[derive(Accounts)]
+pub struct PullStrings&lt;'info&gt; {
+    #[account(mut)]
+    pub puppet: Account&lt;'info, Data&gt;,
+    pub puppet_program: Program&lt;'info, Puppet&gt;,
+    // Even though the puppet program already checks that authority is a signer
+    // using the Signer type here is still required because the anchor ts client
+    // can not infer signers from programs called via CPIs
+    pub authority: Signer&lt;'info&gt;
+}
+
+impl&lt;'info&gt; PullStrings&lt;'info&gt; {
+    pub fn set_data_ctx(&amp;self) -&gt; CpiContext&lt;'_, '_, '_, 'info, SetData&lt;'info&gt;&gt; {
+        let cpi_program = self.puppet_program.to_account_info();
+        let cpi_accounts = SetData {
+            puppet: self.puppet.to_account_info(),
+            authority: self.authority.to_account_info()
+        };
+        CpiContext::new(cpi_program, cpi_accounts)
+    }
+}
+</code></pre>
+<p>Finally, change the test:</p>
+<pre><code class="language-ts">import * as anchor from &quot;@coral-xyz/anchor&quot;;
+import { Program } from &quot;@coral-xyz/anchor&quot;;
+import { Keypair } from &quot;@solana/web3.js&quot;;
+import { Puppet } from &quot;../target/types/puppet&quot;;
+import { PuppetMaster } from &quot;../target/types/puppet_master&quot;;
+import { expect } from &quot;chai&quot;;
+
+describe(&quot;puppet&quot;, () =&gt; {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const puppetProgram = anchor.workspace.Puppet as Program&lt;Puppet&gt;;
+  const puppetMasterProgram = anchor.workspace
+    .PuppetMaster as Program&lt;PuppetMaster&gt;;
+
+  const puppetKeypair = Keypair.generate();
+  const authorityKeypair = Keypair.generate();
+
+  it(&quot;Does CPI!&quot;, async () =&gt; {
+    await puppetProgram.methods
+      .initialize(authorityKeypair.publicKey)
+      .accounts({
+        puppet: puppetKeypair.publicKey,
+        user: provider.wallet.publicKey,
+      })
+      .signers([puppetKeypair])
+      .rpc();
+
+    await puppetMasterProgram.methods
+      .pullStrings(new anchor.BN(42))
+      .accounts({
+        puppetProgram: puppetProgram.programId,
+        puppet: puppetKeypair.publicKey,
+        authority: authorityKeypair.publicKey,
+      })
+      .signers([authorityKeypair])
+      .rpc();
+
+    expect(
+      (
+        await puppetProgram.account.data.fetch(puppetKeypair.publicKey)
+      ).data.toNumber()
+    ).to.equal(42);
+  });
+});
+</code></pre>
+<p>The test passes because the signature that was given to the puppet-master by the authority was then extended to the puppet program which used it to check that the authority for the puppet account had signed the transaction.</p>
+<blockquote>
+<p>Privilege extension is convenient but also dangerous. If a CPI is unintentionally made to a malicious program,
+this program has the same privileges as the caller.
+Anchor protects you from CPIs to malicious programs with two measures.
+First, the <code>Program&lt;'info, T&gt;</code> type checks that the given account is the expected program <code>T</code>.
+Should you ever forget to use the <code>Program</code> type, the automatically generated cpi function
+(in the previous example this was <code>puppet::cpi::set_data</code>)
+also checks that the <code>cpi_program</code> argument equals the expected program.</p>
+</blockquote>
+<h2 id="reloading-an-account"><a class="header" href="#reloading-an-account">Reloading an Account</a></h2>
+<p>In the puppet program, the <code>Account&lt;'info, T&gt;</code> type is used for the <code>puppet</code> account. If a CPI edits an account of that type,
+the caller's account does not change during the instruction.</p>
+<p>You can easily see this for yourself by adding the following right after the <code>puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)</code> cpi call.</p>
+<pre><code class="language-rust ignore">puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)?;
+if ctx.accounts.puppet.data != 42 {
+    panic!();
+}
+Ok(())
+</code></pre>
+<p>Now your test will fail. But why? After all the test used to pass, so the cpi definitely did change the <code>data</code> field to <code>42</code>.</p>
+<p>The reason the <code>data</code> field has not been updated to <code>42</code> in the caller is that at the beginning of the instruction the <code>Account&lt;'info, T&gt;</code> type deserializes the incoming bytes into a new struct. This struct is no longer connected to the underlying data in the account. The CPI changes the data in the underlying account but since the struct in the caller has no connection to the underlying account the struct in the caller remains unchanged.</p>
+<p>If you need to read the value of an account that has just been changed by a CPI, you can call its <code>reload</code> method which will re-deserialize the account. If you put <code>ctx.accounts.puppet.reload()?;</code> right after the cpi call, the test will pass again.</p>
+<pre><code class="language-rust ignore">puppet::cpi::set_data(ctx.accounts.set_data_ctx(), data)?;
+ctx.accounts.puppet.reload()?;
+if ctx.accounts.puppet.data != 42 {
+    panic!();
+}
+Ok(())
+</code></pre>
+<h2 id="returning-values-from-handler-functions"><a class="header" href="#returning-values-from-handler-functions">Returning values from handler functions</a></h2>
+<p>The Anchor handler functions are capable of returning data using the Solana <code>set_return_data</code> and <code>get_return_data</code> syscalls. This data can be used in CPI callers and clients.</p>
+<p>Instead of returning a <code>Result&lt;()&gt;</code>, consider this version of the <code>set_data</code> function from above which has been modified to return <code>Result&lt;u64&gt;</code>:</p>
+<pre><code class="language-rust ignore">pub fn set_data(ctx: Context&lt;SetData&gt;, data: u64) -&gt; Result&lt;u64&gt; {
+    let puppet = &amp;mut ctx.accounts.puppet;
+    puppet.data = data;
+    Ok(data)
+}
+</code></pre>
+<p>Defining a return type that isn't the unit type <code>()</code> will cause Anchor to transparently call <code>set_return_data</code> with the given type (<code>u64</code> in this example) when this function is called. The return from the CPI call is wrapped in a struct to allow for lazy retrieval of this return data. E.g.</p>
+<pre><code class="language-rust ignore">pub fn pull_strings(ctx: Context&lt;PullStrings&gt;, data: u64) -&gt; Result&lt;()&gt; {
+    let cpi_program = ctx.accounts.puppet_program.to_account_info();
+    let cpi_accounts = SetData {
+        puppet: ctx.accounts.puppet.to_account_info(),
+    };
+    let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+    let result = puppet::cpi::set_data(cpi_ctx, data)?;
+    // The below statement calls sol_get_return and deserializes the result.
+    // `return_data` contains the return from `set_data`,
+    // which in this example is just `data`.
+    let return_data = result.get();
+    // ... do something with the `return_data` ...
+}
+</code></pre>
+<p>Note that the type being returned must implement the <code>AnchorSerialize</code> and <code>AnchorDeserialize</code> traits, for example:</p>
+<pre><code class="language-rust ignore">#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct StructReturn {
+    pub value: u64,
+}
+</code></pre>
+<h3 id="reading-return-data-in-the-clients"><a class="header" href="#reading-return-data-in-the-clients">Reading return data in the clients</a></h3>
+<p>It's even possible to use return values without CPIs. This may be useful if you're using a function to calculate a value that you need on the frontend without rewriting the code in the frontend.</p>
+<p>Whether you're using a CPI or not, you can use the <code>view</code> function to read whatever was set last as return data in the transaction (<code>view</code> simulates the transaction and reads the <code>Program return</code> log).</p>
+<p>For example:</p>
+<pre><code class="language-typescript ignore">const returnData = await program.methods
+    .calculate(someVariable)
+    .accounts({
+        acc: somePubkey,
+        anotherAcc: someOtherPubkey
+    })
+    .view();
+</code></pre>
+<h3 id="return-data-size-limit-workarounds"><a class="header" href="#return-data-size-limit-workarounds">Return Data Size Limit Workarounds</a></h3>
+<p>The <code>set_return_data</code> and <code>get_return_data</code> syscalls are limited to 1024 bytes so it's worth briefly explaining the old workaround for CPI return values.</p>
+<p>By using a CPI together with <code>reload</code> it's possible to simulate return values. One could imagine that instead of just setting the <code>data</code> field to <code>42</code> the puppet program did some calculation with the <code>42</code> and saved the result in <code>data</code>. The puppet-master can then call <code>reload</code> after the cpi and use the result of the puppet program's calculation.</p>
+<h2 id="programs-as-signers"><a class="header" href="#programs-as-signers">Programs as Signers</a></h2>
+<p>There's one more thing that can be done with CPIs. But for that, you need to first learn what PDAs are. We'll cover those in the next chapter.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../anchor_in_depth/intermediate.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../anchor_in_depth/PDAs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../anchor_in_depth/intermediate.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../anchor_in_depth/PDAs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
