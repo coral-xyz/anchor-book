@@ -187,7 +187,7 @@ The fix is simple:
 let HARDCODED_COUNTER_COUNTER_ADDRESS = SOME_ADDRESS;
 
 fn increment(accounts) {
-    if accounts.counter.key == HARDCODED_COUNTER_COUNTER_ADDRESS {
+    if accounts.counter.key != HARDCODED_COUNTER_COUNTER_ADDRESS {
         error("Wrong account type");
     }
     let counter = deserialize(accounts.counter);
